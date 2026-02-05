@@ -44,7 +44,7 @@
             --btn-primary-bg: #ffffff; --btn-primary-text: #000000;
         }
 
-        /* THEME: Life of a Showgirl (Updated #e89946) */
+        /* THEME: Life of a Showgirl */
         [data-theme="showgirl"] {
             --bg-body: #fdf6f0; 
             --bg-toolbar: #ffffff;
@@ -53,8 +53,9 @@
             --border-color: #e89946; 
             
             --grid-border: #e89946;
-            --cell-block: #e89946;
+            --cell-block: #000000; /* FIXED: Black blocks */
             
+            /* Great highlights kept as requested */
             --highlight-active: #f4cba0; 
             --highlight-word: #fbebdc;   
             
@@ -109,6 +110,10 @@
         .tool-btn { background: none; border: none; cursor: pointer; color: var(--text-main); font-family: var(--font-body); font-weight: 600; font-size: 0.9rem; padding: 8px 10px; border-radius: 6px; }
         .tool-btn:hover { background: rgba(0,0,0,0.05); }
 
+        /* ERA LOGO */
+        .era-logo { font-family: var(--font-head); font-weight: 900; font-size: 1.4rem; cursor: pointer; display: flex; gap: 1px; }
+        .era-logo:hover { opacity: 0.8; }
+        
         .dropdown { position: relative; }
         .dropdown-menu { display: none; position: absolute; top: 100%; right: 0; background: var(--bg-toolbar); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 5px 20px rgba(0,0,0,0.15); width: 200px; padding: 8px 0; margin-top: 5px; z-index: 200; max-height: 400px; overflow-y: auto; }
         .dropdown.open .dropdown-menu { display: block; }
@@ -125,7 +130,6 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             width: 100%; max-width: 85vh; aspect-ratio: 1 / 1; margin: 0 auto;
             container-type: inline-size;
-            /* FIXED: minmax(0,1fr) prevents content from forcing box expansion */
             grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
             grid-template-rows: repeat(var(--grid-rows), minmax(0, 1fr));
         }
@@ -139,7 +143,7 @@
         }
         
         .cell-num { position: absolute; top: 2%; left: 3%; font-size: 0.3em; color: var(--text-muted); pointer-events: none; line-height: 1; }
-        .cell-text { line-height: 1; margin-top: 5%; } /* Fine tune vertical align */
+        .cell-text { line-height: 1; margin-top: 5%; } 
 
         .cell.block { background-color: var(--cell-block); cursor: default; }
         .cell.highlight-word { background-color: var(--highlight-word); }
@@ -215,7 +219,9 @@
     <div id="screen-game">
         <div class="toolbar">
             <div class="toolbar-group">
-                <div style="font-family: var(--font-head); font-weight: bold; font-size: 1.3rem; margin-right: 10px;">Swiftword</div>
+                <div class="era-logo" onclick="location.reload()" title="Back to Home">
+                    <span style="color: #2e7d32">T</span> <span style="color: #b8860b">h</span> <span style="color: #7b1fa2">e</span> <span>&nbsp;</span>
+                    <span style="color: #d32f2f">S</span> <span style="color: #1976d2">w</span> <span style="color: #000000">i</span> <span style="color: #e91e63">f</span> <span style="color: #616161">t</span> <span style="color: #795548">w</span> <span style="color: #1a237e">o</span> <span style="color: #6d4c41">r</span> <span style="color: #e65100">d</span> </div>
                 <div class="timer-pill" id="timer">0:00</div>
                 <button class="tool-btn" onclick="togglePause()" style="font-size:1.2rem; padding:0 8px;" title="Pause">⏸</button>
             </div>
@@ -361,7 +367,7 @@
             }
         }
 
-        // --- LOCAL STORAGE ---
+        // LOCAL STORAGE
         function saveProgress() {
             if (!gameState.currentPuzzleId || gameState.isComplete) return;
             const saveObj = {
@@ -406,8 +412,6 @@
                 const puzData = parsePuz(buffer);
                 
                 buildGridFromPuz(puzData);
-                
-                // Try Load Save
                 loadProgress(item.file);
                 
                 document.getElementById('puzzle-meta').innerText = `${puzData.title}\n${puzData.author}`;
@@ -417,10 +421,8 @@
                 document.getElementById('screen-game').style.display = 'flex';
                 document.getElementById('modal-ready').style.display = 'flex';
                 
-                // Set Timer Display immediately
                 document.getElementById('timer').innerText = formatTime(gameState.seconds);
                 
-                // Default Cursor
                 let r=0, c=0;
                 while(r < gameState.height && gameState.grid[r][c].isBlock) {
                     c++; if(c >= gameState.width) { c=0; r++; }
@@ -455,8 +457,6 @@
             const gridEl = document.getElementById('crossword-grid'); gridEl.innerHTML = '';
             gridEl.style.setProperty('--grid-cols', gameState.width);
             gridEl.style.setProperty('--grid-rows', gameState.height);
-            
-            // NOTE: minmax(0, 1fr) fixes the jitter by ignoring content size for tracks
             gridEl.style.gridTemplateColumns = `repeat(${gameState.width}, minmax(0, 1fr))`;
             gridEl.style.gridTemplateRows = `repeat(${gameState.height}, minmax(0, 1fr))`;
 
@@ -468,7 +468,6 @@
                     if (cellData.isBlock) div.classList.add('block');
                     else {
                         div.dataset.row = r; div.dataset.col = c;
-                        // Separate text from number
                         div.innerHTML = `<span class="cell-num">${cellData.number || ''}</span><span class="cell-text">${cellData.letter}</span>`;
                         div.addEventListener('mousedown', (e) => {
                             if(gameState.isPlaying && !gameState.isPaused) { e.preventDefault(); handleCellClick(r, c); }
@@ -497,6 +496,7 @@
 
         function toggleDirection() {
             gameState.direction = gameState.direction === 'across' ? 'down' : 'across';
+            updateHighlights();
         }
 
         function jumpToClue(num, dir) {
@@ -517,17 +517,13 @@
             else if (e.key === 'ArrowUp') moveSelection(-1, 0);
             else if (e.key === 'ArrowDown') moveSelection(1, 0);
             else if (e.key === 'Enter') { e.preventDefault(); jumpToNextClue(); }
-            else if (e.key === ' ') { e.preventDefault(); toggleDirection(); updateHighlights(); }
+            else if (e.key === ' ') { e.preventDefault(); toggleDirection(); }
             else if (e.key.match(/^[a-zA-Z]$/)) {
                 e.preventDefault();
                 updateCell(r, c, e.key.toUpperCase());
-                
-                // CHECK WIN
                 checkWinCondition();
-
                 if (gameState.direction === 'across') jumpCursor(0, 1);
                 else jumpCursor(1, 0);
-                
                 saveProgress();
             } 
             else if (e.key === 'Backspace') {
@@ -570,7 +566,7 @@
                     gameState.isComplete = true;
                     document.getElementById('win-time').innerText = formatTime(gameState.seconds);
                     document.getElementById('modal-win').style.display = 'flex';
-                    clearProgress(); // Clear save on win
+                    clearProgress();
                 } else {
                     document.getElementById('modal-tryagain').style.display = 'flex';
                 }
