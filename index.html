@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Swiftword</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- THEMES & CSS (Kept exactly as you liked them) --- */
+        :root {
+            /* DEFAULT: TTPD (Light Mode) */
+            --bg-body: #ffffff;
+            --bg-toolbar: #ffffff;
+            --bg-grid-area: #e8e6e1;
+            --text-main: #1a1a1a;
+            --text-muted: #666666;
+            --border-color: #d1d1d1;
+            
+            --grid-border: #000000;
+            --cell-bg: #ffffff;
+            --cell-block: #000000;
+            --cell-text: #000000;
+            
+            --highlight-active: #dbcbbd; 
+            --highlight-word: #f2efe9;   
+            
+            --btn-primary-bg: #1a1a1a;
+            --btn-primary-text: #ffffff;
+            
+            --font-head: 'Playfair Display', serif;
+            --font-body: 'Libre Franklin', sans-serif;
+            --cell-size: 26px; /* Slightly larger for readability */
+        }
+
+        /* THEME: The Anthology (Dark Mode) */
+        [data-theme="anthology"] {
+            --bg-body: #1a1a1a; --bg-toolbar: #222222; --bg-grid-area: #121212;
+            --text-main: #e0e0e0; --text-muted: #a0a0a0; --border-color: #444444;
+            --grid-border: #666666; --cell-bg: #333333; --cell-block: #111111; --cell-text: #ffffff;
+            --highlight-active: #5c5c5c; --highlight-word: #404040;
+            --btn-primary-bg: #ffffff; --btn-primary-text: #000000;
+        }
+
+        /* THEME: Life of a Showgirl */
+        [data-theme="showgirl"] {
+            --bg-body: #fff0f5; --bg-toolbar: #fff; --bg-grid-area: #fae6fa;
+            --text-main: #000; --grid-border: #d4af37; --cell-block: #d4af37;
+            --highlight-active: #ffb7c5; --highlight-word: #fffacd;
+            --btn-primary-bg: #d4af37; --btn-primary-text: #000;
+        }
+
+        /* ERAS PALETTES */
+        [data-theme="midnights"] { --highlight-active: #4b5d85; --highlight-word: #dbe4ed; --btn-primary-bg: #192a56; }
+        [data-theme="evermore"] { --highlight-active: #d9cbb8; --highlight-word: #f0eadd; --btn-primary-bg: #6e4e37; }
+        [data-theme="folklore"] { --highlight-active: #cfcfcf; --highlight-word: #ebebeb; --btn-primary-bg: #555555; }
+        [data-theme="lover"] { --highlight-active: #ffcce6; --highlight-word: #ffeef7; --btn-primary-bg: #e06ba8; }
+        [data-theme="reputation"] { --highlight-active: #999; --highlight-word: #ccc; --btn-primary-bg: #000; --cell-block: #333; }
+        [data-theme="1989"] { --highlight-active: #b3d9ff; --highlight-word: #e6f2ff; --btn-primary-bg: #4d8ac9; }
+        [data-theme="red"] { --highlight-active: #ffcccc; --highlight-word: #ffe6e6; --btn-primary-bg: #8a1c1c; }
+        [data-theme="speaknow"] { --highlight-active: #dcc2e0; --highlight-word: #f3e6f5; --btn-primary-bg: #5a2e6b; }
+        [data-theme="fearless"] { --highlight-active: #fceea7; --highlight-word: #fff9db; --btn-primary-bg: #a68a2d; }
+        [data-theme="debut"] { --highlight-active: #b5e5c9; --highlight-word: #e0f5ea; --btn-primary-bg: #1c6b4a; }
+
+        /* --- LAYOUT --- */
+        body {
+            font-family: var(--font-body); background-color: var(--bg-body); color: var(--text-main);
+            margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; transition: all 0.3s ease;
+        }
+
+        #screen-welcome {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: var(--bg-body); z-index: 50;
+        }
+        .brand-title { font-family: var(--font-head); font-size: 3.5rem; margin-bottom: 0.5rem; }
+        
+        .btn { padding: 12px 28px; border-radius: 50px; font-weight: 600; cursor: pointer; border: none; font-family: var(--font-body); font-size: 1rem; transition: transform 0.1s; }
+        .btn-primary { background-color: var(--btn-primary-bg); color: var(--btn-primary-text); }
+        .btn-primary:hover { transform: scale(1.05); }
+
+        /* MODALS */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.6); backdrop-filter: blur(8px); z-index: 100; align-items: center; justify-content: center; }
+        [data-theme="anthology"] .modal-overlay { background: rgba(0,0,0,0.7); }
+        .modal-card { background: var(--bg-toolbar); color: var(--text-main); padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); text-align: center; border: 1px solid var(--border-color); max-width: 350px; }
+
+        /* GAME UI */
+        #screen-game { display: none; flex-direction: column; height: 100%; }
+        .toolbar { height: 60px; border-bottom: 1px solid var(--border-color); background: var(--bg-toolbar); flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
+        .toolbar-group { display: flex; align-items: center; gap: 10px; }
+        .timer-pill { background: var(--bg-grid-area); color: var(--text-main); padding: 6px 14px; border-radius: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+        .tool-btn { background: none; border: none; cursor: pointer; color: var(--text-main); font-family: var(--font-body); font-weight: 600; font-size: 0.9rem; padding: 8px 10px; border-radius: 6px; }
+        .tool-btn:hover { background: rgba(0,0,0,0.05); }
+
+        /* DROPDOWNS */
+        .dropdown { position: relative; }
+        .dropdown-menu { display: none; position: absolute; top: 100%; right: 0; background: var(--bg-toolbar); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 5px 20px rgba(0,0,0,0.15); width: 200px; padding: 8px 0; margin-top: 5px; z-index: 200; max-height: 400px; overflow-y: auto; }
+        .dropdown.open .dropdown-menu { display: block; }
+        .dropdown-item { display: block; width: 100%; text-align: left; padding: 8px 20px; border: none; background: none; cursor: pointer; color: var(--text-main); font-family: var(--font-body); font-size: 0.9rem; }
+        .dropdown-item:hover { background: var(--bg-grid-area); }
+        .dropdown-header { padding: 8px 20px; font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+
+        /* GRID */
+        .game-layout { display: flex; flex: 1; overflow: hidden; }
+        .grid-area { flex: 1; background: var(--bg-grid-area); padding: 20px; overflow: auto; display: flex; justify-content: center; align-items: flex-start; }
+        #crossword-grid { display: grid; gap: 1px; background-color: var(--grid-border); border: 4px solid var(--grid-border); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .cell { background-color: var(--cell-bg); color: var(--cell-text); position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; font-weight: 600; font-size: calc(var(--cell-size) * 0.65); width: var(--cell-size); height: var(--cell-size); }
+        .cell-num { position: absolute; top: 1px; left: 1px; font-size: 8px; color: var(--text-muted); pointer-events: none; line-height: 1;}
+        .cell.block { background-color: var(--cell-block); cursor: default; }
+        .cell.highlight-word { background-color: var(--highlight-word); }
+        .cell.highlight-active { background-color: var(--highlight-active); z-index: 2; }
+        .cell.wrong { color: #d32f2f; }
+        .cell.verified { color: #2e7d32; }
+
+        /* CLUES */
+        .clue-sidebar { width: 350px; border-left: 1px solid var(--border-color); background: var(--bg-toolbar); display: flex; flex-direction: column; z-index: 20; }
+        .clue-sticky-header { padding: 12px 15px; background: var(--bg-grid-area); border-bottom: 1px solid var(--border-color); font-weight: 600; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .clue-columns-wrapper { display: flex; flex: 1; overflow: hidden; }
+        .clue-column { flex: 1; display: flex; flex-direction: column; border-right: 1px solid var(--border-color); }
+        .clue-column:last-child { border-right: none; }
+        .clue-head { padding: 10px; font-family: var(--font-head); font-weight: 700; border-bottom: 1px solid var(--border-color); text-align: center; font-size: 0.9rem; }
+        .clue-list { flex: 1; overflow-y: auto; padding: 5px; }
+        .clue-row { padding: 4px 8px; font-size: 0.85rem; cursor: pointer; border-radius: 4px; margin-bottom: 2px; line-height: 1.3; }
+        .clue-row:hover { background: var(--bg-grid-area); }
+        .clue-row.active-clue { background: var(--highlight-active); color: var(--text-main); }
+    </style>
+</head>
+<body data-theme="ttpd">
+
+    <div id="screen-welcome">
+        <h1 class="brand-title">The Swiftword</h1>
+        <p style="color:var(--text-muted); margin-bottom: 30px; font-size: 1.1rem;">Sunday Edition</p>
+        <button class="btn btn-primary" onclick="loadPuzzle(0)">Play Latest</button>
+        <p id="loading-msg" style="display:none; margin-top:10px; color:var(--text-muted);">Loading puzzle...</p>
+    </div>
+
+    <div id="modal-ready" class="modal-overlay">
+        <div class="modal-card">
+            <h2 class="brand-title" style="font-size: 2rem;">Ready?</h2>
+            <p id="puzzle-meta" style="color: var(--text-muted); margin-bottom: 20px; font-weight: 600;"></p>
+            <button class="btn btn-primary" onclick="startGame()">Start</button>
+        </div>
+    </div>
+
+    <div id="modal-pause" class="modal-overlay">
+        <div class="modal-card">
+            <h2 class="brand-title" style="font-size: 2rem;">Paused</h2>
+            <div id="pause-time" style="font-size: 1.5rem; font-weight: bold; margin-bottom: 20px;">0:00</div>
+            <button class="btn btn-primary" onclick="togglePause()">Resume</button>
+        </div>
+    </div>
+
+    <div id="screen-game">
+        <div class="toolbar">
+            <div class="toolbar-group">
+                <div style="font-family: var(--font-head); font-weight: bold; font-size: 1.3rem; margin-right: 10px;">Swiftword</div>
+                <div class="timer-pill" id="timer">0:00</div>
+                <button class="tool-btn" onclick="togglePause()" style="font-size:1.2rem; padding:0 8px;" title="Pause">⏸</button>
+            </div>
+            
+            <div class="toolbar-group">
+                <div class="dropdown" id="dropdown-theme">
+                    <button class="tool-btn" onclick="toggleDropdown('dropdown-theme')">Theme ▾</button>
+                    <div class="dropdown-menu">
+                        <div class="dropdown-header">Current Era</div>
+                        <button class="dropdown-item" onclick="setTheme('ttpd')">Tortured Poets (Light)</button>
+                        <button class="dropdown-item" onclick="setTheme('anthology')">Anthology (Dark)</button>
+                        <button class="dropdown-item" onclick="setTheme('showgirl')">Life of a Showgirl</button>
+                        
+                        <div class="dropdown-header">Archive</div>
+                        <div id="archive-list"></div>
+
+                        <div class="dropdown-header" style="margin-top: 5px;">Eras Palette</div>
+                        <button class="dropdown-item" onclick="setTheme('midnights')">Midnights</button>
+                        <button class="dropdown-item" onclick="setTheme('evermore')">Evermore</button>
+                        <button class="dropdown-item" onclick="setTheme('folklore')">Folklore</button>
+                        <button class="dropdown-item" onclick="setTheme('lover')">Lover</button>
+                        <button class="dropdown-item" onclick="setTheme('reputation')">Reputation</button>
+                        <button class="dropdown-item" onclick="setTheme('1989')">1989</button>
+                        <button class="dropdown-item" onclick="setTheme('red')">Red</button>
+                        <button class="dropdown-item" onclick="setTheme('speaknow')">Speak Now</button>
+                        <button class="dropdown-item" onclick="setTheme('fearless')">Fearless</button>
+                        <button class="dropdown-item" onclick="setTheme('debut')">Debut</button>
+                    </div>
+                </div>
+
+                <div class="dropdown" id="dropdown-reveal">
+                    <button class="tool-btn" onclick="toggleDropdown('dropdown-reveal')">Reveal ▾</button>
+                    <div class="dropdown-menu">
+                        <button class="dropdown-item" onclick="revealItem('square')">Square</button>
+                        <button class="dropdown-item" onclick="revealItem('word')">Word</button>
+                        <button class="dropdown-item" onclick="revealItem('puzzle')">Puzzle</button>
+                    </div>
+                </div>
+                
+                <div class="dropdown" id="dropdown-check">
+                    <button class="tool-btn" onclick="toggleDropdown('dropdown-check')">Check ▾</button>
+                    <div class="dropdown-menu">
+                        <button class="dropdown-item" onclick="checkItem('square')">Square</button>
+                        <button class="dropdown-item" onclick="checkItem('word')">Word</button>
+                        <button class="dropdown-item" onclick="checkItem('puzzle')">Puzzle</button>
+                        <div style="border-top:1px solid var(--border-color); margin: 4px 0;"></div>
+                        <button class="dropdown-item" onclick="toggleAutocheck()" id="menu-autocheck">Autocheck: Off</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-layout">
+            <div class="grid-area">
+                <div id="crossword-grid"></div>
+            </div>
+
+            <div class="clue-sidebar">
+                <div class="clue-sticky-header" id="sticky-clue">Select a square to start</div>
+                <div class="clue-columns-wrapper">
+                    <div class="clue-column">
+                        <div class="clue-head">ACROSS</div>
+                        <div class="clue-list" id="across-clues"></div>
+                    </div>
+                    <div class="clue-column">
+                        <div class="clue-head">DOWN</div>
+                        <div class="clue-list" id="down-clues"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        //  USER CONFIGURATION (UPDATE THIS LIST!)
+        // ==========================================
+        const PUZZLE_ARCHIVE = [
+            // { file: "filename.puz", title: "Display Title" }
+            // The first item in this list is "Today's Puzzle"
+            { file: "example.puz", title: "Swiftword Example #1" },
+        ];
+        
+        // ==========================================
+        //  APP LOGIC
+        // ==========================================
+        
+        let gameState = {
+            grid: [], solution: [], clues: { across: {}, down: {} },
+            width: 0, height: 0,
+            currentRow: 0, currentCol: 0, direction: 'across',
+            isPlaying: false, isPaused: false,
+            timerInterval: null, seconds: 0, autocheck: false
+        };
+
+        // --- PUZ PARSER ---
+        function parsePuz(buffer) {
+            const view = new DataView(buffer);
+            const decoder = new TextDecoder("ISO-8859-1"); // Standard .puz encoding
+
+            // Header info
+            const width = view.getUint8(0x2C);
+            const height = view.getUint8(0x2D);
+            const clueCount = view.getUint16(0x2E, true);
+
+            // Grid Data starts at 0x34
+            let offset = 0x34;
+            const solutionStr = decoder.decode(buffer.slice(offset, offset + (width * height)));
+            offset += (width * height);
+            
+            // Player state (usually empty, we skip)
+            offset += (width * height);
+
+            // Strings (Title, Author, Copyright, Clues...)
+            // Read until null byte
+            const readString = () => {
+                let str = "";
+                while (offset < buffer.byteLength) {
+                    const code = view.getUint8(offset++);
+                    if (code === 0) break;
+                    str += String.fromCharCode(code);
+                }
+                return str;
+            };
+
+            const title = readString();
+            const author = readString();
+            const copyright = readString();
+            
+            // Collect Clues
+            const rawClues = [];
+            for(let i=0; i < clueCount; i++) {
+                rawClues.push(readString());
+            }
+
+            return { width, height, solutionStr, rawClues, title, author };
+        }
+
+        function buildGridFromPuz(data) {
+            const { width, height, solutionStr, rawClues } = data;
+            gameState.width = width;
+            gameState.height = height;
+            gameState.grid = [];
+            gameState.solution = [];
+            gameState.clues = { across: {}, down: {} };
+
+            // 1. Build Grid Structure
+            let gridIndex = 0;
+            for (let r = 0; r < height; r++) {
+                let rowData = [];
+                let solRow = [];
+                for (let c = 0; c < width; c++) {
+                    const char = solutionStr[gridIndex++];
+                    const isBlock = char === '.';
+                    rowData.push({ letter: '', isBlock: isBlock, number: null });
+                    solRow.push(isBlock ? '#' : char);
+                }
+                gameState.grid.push(rowData);
+                gameState.solution.push(solRow);
+            }
+
+            // 2. Numbering & Clue Assignment
+            let currentNum = 1;
+            let clueIndex = 0;
+
+            for (let r = 0; r < height; r++) {
+                for (let c = 0; c < width; c++) {
+                    if (gameState.grid[r][c].isBlock) continue;
+
+                    let isAcross = false;
+                    let isDown = false;
+
+                    // Check if it's start of Across
+                    if (c === 0 || gameState.grid[r][c-1].isBlock) {
+                        if (c + 1 < width && !gameState.grid[r][c+1].isBlock) isAcross = true;
+                    }
+
+                    // Check if it's start of Down
+                    if (r === 0 || gameState.grid[r-1][c].isBlock) {
+                        if (r + 1 < height && !gameState.grid[r+1][c].isBlock) isDown = true;
+                    }
+
+                    if (isAcross || isDown) {
+                        gameState.grid[r][c].number = currentNum;
+                        
+                        if (isAcross) {
+                            gameState.clues.across[currentNum] = rawClues[clueIndex++];
+                        }
+                        if (isDown) {
+                            gameState.clues.down[currentNum] = rawClues[clueIndex++];
+                        }
+                        currentNum++;
+                    }
+                }
+            }
+        }
+
+        // --- LOADING ---
+        async function loadPuzzle(index) {
+            const item = PUZZLE_ARCHIVE[index];
+            if(!item) return;
+
+            document.getElementById('loading-msg').style.display = 'block';
+            
+            try {
+                // Fetch from the puzzles folder
+                const response = await fetch(`puzzles/${item.file}`);
+                if (!response.ok) throw new Error("Puzzle file not found");
+                
+                const buffer = await response.arrayBuffer();
+                const puzData = parsePuz(buffer);
+                
+                buildGridFromPuz(puzData);
+                
+                // Update UI
+                document.getElementById('puzzle-meta').innerText = `${puzData.title} \n by ${puzData.author}`;
+                renderGrid();
+                renderClues();
+                
+                // Switch Screens
+                document.getElementById('screen-welcome').style.display = 'none';
+                document.getElementById('screen-game').style.display = 'flex';
+                document.getElementById('modal-ready').style.display = 'flex';
+                
+                // Set Default Position
+                // Find first non-block
+                let r=0, c=0;
+                while(gameState.grid[r][c].isBlock) c++;
+                moveCursor(r, c);
+
+            } catch (e) {
+                alert("Error loading puzzle: " + e.message + "\nMake sure you uploaded the .puz file to the 'puzzles' folder!");
+                console.error(e);
+            } finally {
+                document.getElementById('loading-msg').style.display = 'none';
+            }
+        }
+
+        // --- INIT ---
+        window.onload = function() {
+            // Populate Archive Menu
+            const list = document.getElementById('archive-list');
+            PUZZLE_ARCHIVE.forEach((puz, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'dropdown-item';
+                btn.innerText = puz.title;
+                btn.onclick = () => {
+                    if(gameState.isPlaying) {
+                        if(!confirm("Abandon current game?")) return;
+                        clearInterval(gameState.timerInterval);
+                        gameState.seconds = 0;
+                        document.getElementById('timer').innerText = "0:00";
+                    }
+                    loadPuzzle(idx);
+                };
+                list.appendChild(btn);
+            });
+        };
+
+        // --- GAMEPLAY FUNCTIONS (Standard) ---
+        function startGame() {
+            document.getElementById('modal-ready').style.display = 'none';
+            gameState.isPlaying = true;
+            runTimer();
+            document.addEventListener('keydown', handleInput);
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.dropdown')) closeAllDropdowns();
+            });
+        }
+
+        function renderGrid() {
+            const gridEl = document.getElementById('crossword-grid');
+            gridEl.innerHTML = '';
+            
+            // Dynamic Grid Sizing
+            gridEl.style.gridTemplateColumns = `repeat(${gameState.width}, var(--cell-size))`;
+            gridEl.style.gridTemplateRows = `repeat(${gameState.height}, var(--cell-size))`;
+
+            for (let r = 0; r < gameState.height; r++) {
+                for (let c = 0; c < gameState.width; c++) {
+                    const cellData = gameState.grid[r][c];
+                    const div = document.createElement('div');
+                    div.className = 'cell';
+                    if (cellData.isBlock) {
+                        div.classList.add('block');
+                    } else {
+                        div.dataset.row = r; div.dataset.col = c;
+                        div.innerHTML = `<span class="cell-num">${cellData.number || ''}</span><span class="cell-text">${cellData.letter}</span>`;
+                        div.addEventListener('mousedown', (e) => {
+                            if(gameState.isPlaying && !gameState.isPaused) {
+                                e.preventDefault(); handleCellClick(r, c);
+                            }
+                        });
+                    }
+                    gridEl.appendChild(div);
+                }
+            }
+        }
+
+        function renderClues() {
+            const ac = document.getElementById('across-clues');
+            const dc = document.getElementById('down-clues');
+            ac.innerHTML = ''; dc.innerHTML = '';
+            
+            // Sort clues numerically
+            const aKeys = Object.keys(gameState.clues.across).sort((a,b)=>a-b);
+            const dKeys = Object.keys(gameState.clues.down).sort((a,b)=>a-b);
+
+            aKeys.forEach(num => {
+                ac.innerHTML += `<div class="clue-row" id="clue-a-${num}" onclick="jumpToClue(${num}, 'across')"><strong>${num}</strong> ${gameState.clues.across[num]}</div>`;
+            });
+            dKeys.forEach(num => {
+                dc.innerHTML += `<div class="clue-row" id="clue-d-${num}" onclick="jumpToClue(${num}, 'down')"><strong>${num}</strong> ${gameState.clues.down[num]}</div>`;
+            });
+        }
+        
+        // --- MOVEMENT & INPUT ---
+        function handleCellClick(r, c) {
+            if (gameState.currentRow === r && gameState.currentCol === c) {
+                gameState.direction = gameState.direction === 'across' ? 'down' : 'across';
+            } else {
+                gameState.currentRow = r; gameState.currentCol = c;
+            }
+            updateHighlights();
+        }
+
+        function jumpToClue(num, dir) {
+            // Find the cell with this number
+            for(let r=0; r<gameState.height; r++){
+                for(let c=0; c<gameState.width; c++){
+                    if(gameState.grid[r][c].number == num) {
+                        gameState.currentRow = r;
+                        gameState.currentCol = c;
+                        gameState.direction = dir;
+                        updateHighlights();
+                        return;
+                    }
+                }
+            }
+        }
+
+        function handleInput(e) {
+            if (!gameState.isPlaying || gameState.isPaused) return;
+            let r = gameState.currentRow, c = gameState.currentCol;
+
+            if (e.key === 'ArrowRight') moveChecked(0, 1);
+            else if (e.key === 'ArrowLeft') moveChecked(0, -1);
+            else if (e.key === 'ArrowUp') moveChecked(-1, 0);
+            else if (e.key === 'ArrowDown') moveChecked(1, 0);
+            else if (e.key.match(/^[a-zA-Z]$/)) {
+                gameState.grid[r][c].letter = e.key.toUpperCase();
+                getCellEl(r, c).querySelector('.cell-text').innerText = e.key.toUpperCase();
+                
+                if(gameState.autocheck) checkItem('square');
+                else getCellEl(r,c).classList.remove('wrong');
+                
+                // Move forward
+                if (gameState.direction === 'across') moveChecked(0, 1);
+                else moveChecked(1, 0);
+            } 
+            else if (e.key === 'Backspace') {
+                if (gameState.grid[r][c].letter === '') {
+                     if (gameState.direction === 'across') moveChecked(0, -1);
+                     else moveChecked(-1, 0);
+                }
+                gameState.grid[gameState.currentRow][gameState.currentCol].letter = '';
+                getCellEl(gameState.currentRow, gameState.currentCol).querySelector('.cell-text').innerText = '';
+            }
+        }
+
+        function moveChecked(dr, dc) {
+            let nr = gameState.currentRow + dr;
+            let nc = gameState.currentCol + dc;
+            if (nr >= 0 && nr < gameState.height && nc >= 0 && nc < gameState.width) {
+                 if(!gameState.grid[nr][nc].isBlock) {
+                    gameState.currentRow = nr; gameState.currentCol = nc; updateHighlights();
+                 }
+            }
+        }
+        
+        function moveCursor(r, c) {
+            gameState.currentRow = r; gameState.currentCol = c;
+            updateHighlights();
+        }
+
+        function updateHighlights() {
+            document.querySelectorAll('.cell').forEach(el => el.classList.remove('highlight-word', 'highlight-active'));
+            document.querySelectorAll('.clue-row').forEach(el => el.classList.remove('active-clue'));
+
+            const wordCells = getWordRange(gameState.currentRow, gameState.currentCol, gameState.direction);
+            wordCells.forEach(pos => {
+                const el = getCellEl(pos.r, pos.c);
+                if(el) el.classList.add('highlight-word');
+            });
+
+            const activeEl = getCellEl(gameState.currentRow, gameState.currentCol);
+            if(activeEl) {
+                activeEl.classList.add('highlight-active');
+                activeEl.scrollIntoView({behavior: "smooth", block: "nearest", inline: "center"});
+            }
+            
+            // Highlight List Clue
+            // We need to find the number of the START of this word
+            const startCell = wordCells[0];
+            const num = gameState.grid[startCell.r][startCell.c].number;
+            const dirChar = gameState.direction === 'across' ? 'a' : 'd';
+            const clueEl = document.getElementById(`clue-${dirChar}-${num}`);
+            
+            if(clueEl) {
+                clueEl.classList.add('active-clue');
+                clueEl.scrollIntoView({behavior: "smooth", block: "nearest"});
+                
+                // Update Sticky
+                const dirText = gameState.direction === 'across' ? 'A' : 'D';
+                const clueText = gameState.clues[gameState.direction][num];
+                document.getElementById('sticky-clue').innerText = `${num}${dirText} \u00A0 ${clueText}`;
+            }
+        }
+
+        function getWordRange(r, c, dir) {
+            let cells = [];
+            let cr = r, cc = c;
+            // Back
+            while(true) {
+                if (dir === 'across') cc--; else cr--;
+                if (cr < 0 || cc < 0 || gameState.grid[cr][cc].isBlock) break;
+                cells.push({r: cr, c: cc});
+            }
+            cells.reverse(); // So it starts at beginning of word
+            cells.push({r, c});
+            
+            // Forward
+            cr = r; cc = c;
+            while(true) {
+                if (dir === 'across') cc++; else cr++;
+                if (cr >= gameState.height || cc >= gameState.width || gameState.grid[cr][cc].isBlock) break;
+                cells.push({r: cr, c: cc});
+            }
+            return cells;
+        }
+
+        function getCellEl(r, c) { return document.querySelector(`.cell[data-row='${r}'][data-col='${c}']`); }
+
+        // --- TOOLS ---
+        function togglePause() {
+            if(!gameState.isPlaying) return;
+            gameState.isPaused = !gameState.isPaused;
+            const pauseModal = document.getElementById('modal-pause');
+            if (gameState.isPaused) {
+                clearInterval(gameState.timerInterval);
+                document.getElementById('pause-time').innerText = formatTime(gameState.seconds);
+                pauseModal.style.display = 'flex';
+            } else {
+                runTimer();
+                pauseModal.style.display = 'none';
+            }
+        }
+        function runTimer() {
+            clearInterval(gameState.timerInterval);
+            gameState.timerInterval = setInterval(() => {
+                gameState.seconds++;
+                document.getElementById('timer').innerText = formatTime(gameState.seconds);
+            }, 1000);
+        }
+        function formatTime(s) { return `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`; }
+
+        function toggleDropdown(id) {
+            const el = document.getElementById(id);
+            const wasOpen = el.classList.contains('open');
+            closeAllDropdowns();
+            if(!wasOpen) el.classList.add('open');
+        }
+        function closeAllDropdowns() { document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('open')); }
+        
+        function setTheme(theme) { document.body.setAttribute('data-theme', theme); closeAllDropdowns(); }
+        
+        function toggleAutocheck() {
+            gameState.autocheck = !gameState.autocheck;
+            document.getElementById('menu-autocheck').innerText = `Autocheck: ${gameState.autocheck ? 'On' : 'Off'}`;
+            if(gameState.autocheck) checkItem('puzzle');
+            closeAllDropdowns();
+        }
+        
+        function checkItem(scope) {
+            let list = getScopeList(scope);
+            list.forEach(pos => {
+                const el = getCellEl(pos.r, pos.c);
+                const user = gameState.grid[pos.r][pos.c].letter;
+                const corr = gameState.solution[pos.r][pos.c];
+                if(user && user !== corr) el.classList.add('wrong');
+                else el.classList.remove('wrong');
+            });
+            closeAllDropdowns();
+        }
+        
+        function revealItem(scope) {
+            let list = getScopeList(scope);
+            list.forEach(pos => {
+                gameState.grid[pos.r][pos.c].letter = gameState.solution[pos.r][pos.c];
+                const el = getCellEl(pos.r, pos.c);
+                el.querySelector('.cell-text').innerText = gameState.solution[pos.r][pos.c];
+                el.classList.add('verified');
+                el.classList.remove('wrong');
+            });
+            closeAllDropdowns();
+        }
+        
+        function getScopeList(scope) {
+            let list = [];
+            if(scope === 'square') list.push({r: gameState.currentRow, c: gameState.currentCol});
+            else if(scope === 'word') list = getWordRange(gameState.currentRow, gameState.currentCol, gameState.direction);
+            else if(scope === 'puzzle') {
+                for(let r=0; r<gameState.height; r++)
+                    for(let c=0; c<gameState.width; c++)
+                        if(!gameState.grid[r][c].isBlock) list.push({r, c});
+            }
+            return list;
+        }
+
+    </script>
+</body>
+</html>
