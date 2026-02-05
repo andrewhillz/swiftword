@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Swiftword</title>
-    <link rel="icon" type="image/png" href="Images/favicon.png">
+    <link rel="icon" type="image/png" href="images/favicon.png">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -45,17 +45,15 @@
             --btn-primary-bg: #ffffff; --btn-primary-text: #000000;
         }
 
-        /* THEME: Life of a Showgirl */
+        /* THEME: Life of a Showgirl (Highlights Only) */
         [data-theme="showgirl"] {
-            --bg-body: #fdf6f0; 
-            --bg-toolbar: #ffffff;
-            --bg-grid-area: #faeecf; 
-            --text-main: #000000;
-            --border-color: #e89946; 
-            --grid-border: #e89946;
-            --cell-block: #000000;
-            --highlight-active: #f4cba0; 
-            --highlight-word: #fbebdc;   
+            /* Backgrounds & Borders remain standard (inherited from :root) */
+            
+            /* Orange Highlights */
+            --highlight-active: #ffccbc; 
+            --highlight-word: #fff3e0;   
+            
+            /* Orange Accent Button */
             --btn-primary-bg: #e89946;
             --btn-primary-text: #ffffff;
         }
@@ -115,7 +113,7 @@
 
         /* TOOLBAR LOGO */
         .toolbar-logo {
-            height: 32px; /* Adjustable based on your image aspect ratio */
+            height: 32px; 
             width: auto;
             cursor: pointer;
             transition: opacity 0.2s;
@@ -173,7 +171,7 @@
 <body data-theme="ttpd">
 
     <div id="screen-welcome">
-        <img src="Images/logo.png" alt="The Swiftword" class="main-logo-img">
+        <img src="images/logo.png" alt="The Swiftword" class="main-logo-img">
         
         <button class="btn btn-primary" onclick="loadPuzzle(0)">Play Latest</button>
         <button class="btn btn-secondary" onclick="openArchiveModal()">The Archive</button>
@@ -226,7 +224,7 @@
     <div id="screen-game">
         <div class="toolbar">
             <div class="toolbar-group">
-                <img src="Images/textlogo.png" alt="Swiftword" class="toolbar-logo" onclick="location.reload()" title="Back to Home">
+                <img src="images/textlogo.png" alt="Swiftword" class="toolbar-logo" onclick="location.reload()" title="Back to Home">
                 
                 <div class="timer-pill" id="timer">0:00</div>
                 <button class="tool-btn" onclick="togglePause()" style="font-size:1.2rem; padding:0 8px;" title="Pause">⏸</button>
