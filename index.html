@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 
     <style>
-        /* --- THEMES --- */
+        /* --- VARIABLES --- */
         :root {
             /* DEFAULT: TTPD (Light Mode) */
             --bg-body: #ffffff;
@@ -44,22 +44,10 @@
             --btn-primary-bg: #ffffff; --btn-primary-text: #000000;
         }
 
-        /* THEME: Life of a Showgirl (Orange) */
-        [data-theme="showgirl"] {
-            --bg-body: #fffaf0; 
-            --bg-toolbar: #ffffff;
-            --bg-grid-area: #fff5e6; 
-            --text-main: #000000;
-            --border-color: #ffcc99;
-            --grid-border: #ff8c00; 
-            --cell-block: #ff8c00;
-            --highlight-active: #ffd8b1; 
-            --highlight-word: #fff0e0;   
-            --btn-primary-bg: #ff8c00;
-            --btn-primary-text: #ffffff;
-        }
-
-        /* Eras Palettes */
+        /* ERAS PALETTES (Muted & Elegant) */
+        /* Showgirl: Muted Orange */
+        [data-theme="showgirl"] { --highlight-active: #ffccbc; --highlight-word: #fff3e0; --btn-primary-bg: #e65100; }
+        
         [data-theme="midnights"] { --highlight-active: #4b5d85; --highlight-word: #dbe4ed; --btn-primary-bg: #192a56; }
         [data-theme="evermore"] { --highlight-active: #d9cbb8; --highlight-word: #f0eadd; --btn-primary-bg: #6e4e37; }
         [data-theme="folklore"] { --highlight-active: #cfcfcf; --highlight-word: #ebebeb; --btn-primary-bg: #555555; }
@@ -78,7 +66,6 @@
             margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; transition: all 0.3s ease;
         }
 
-        /* WELCOME SCREEN */
         #screen-welcome {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -86,14 +73,8 @@
         }
         .brand-title { font-family: var(--font-head); font-size: 4rem; margin: 0; line-height: 1.1; }
         
-        .btn { 
-            padding: 14px 32px; border-radius: 50px; font-weight: 600; cursor: pointer; border: none; 
-            font-family: var(--font-body); font-size: 1.1rem; transition: transform 0.1s; 
-        }
-        .btn-secondary {
-            background: transparent; border: 2px solid var(--border-color); color: var(--text-main);
-            font-size: 0.95rem; padding: 10px 24px;
-        }
+        .btn { padding: 14px 32px; border-radius: 50px; font-weight: 600; cursor: pointer; border: none; font-family: var(--font-body); font-size: 1.1rem; transition: transform 0.1s; }
+        .btn-secondary { background: transparent; border: 2px solid var(--border-color); color: var(--text-main); font-size: 0.95rem; padding: 10px 24px; }
         .btn-primary { background-color: var(--btn-primary-bg); color: var(--btn-primary-text); }
         .btn-primary:hover, .btn-secondary:hover { transform: scale(1.05); }
 
@@ -103,10 +84,7 @@
         .modal-card { background: var(--bg-toolbar); color: var(--text-main); padding: 40px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); text-align: center; border: 1px solid var(--border-color); width: 90%; max-width: 400px; max-height: 80vh; overflow-y: auto; }
         
         .archive-list { list-style: none; padding: 0; margin: 20px 0; text-align: left; }
-        .archive-item { 
-            padding: 12px; border-bottom: 1px solid var(--border-color); cursor: pointer; 
-            display: flex; justify-content: space-between; align-items: center;
-        }
+        .archive-item { padding: 12px; border-bottom: 1px solid var(--border-color); cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         .archive-item:hover { background: var(--bg-grid-area); }
 
         /* GAME UI */
@@ -117,62 +95,38 @@
         .tool-btn { background: none; border: none; cursor: pointer; color: var(--text-main); font-family: var(--font-body); font-weight: 600; font-size: 0.9rem; padding: 8px 10px; border-radius: 6px; }
         .tool-btn:hover { background: rgba(0,0,0,0.05); }
 
-        /* DROPDOWNS */
         .dropdown { position: relative; }
         .dropdown-menu { display: none; position: absolute; top: 100%; right: 0; background: var(--bg-toolbar); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 5px 20px rgba(0,0,0,0.15); width: 200px; padding: 8px 0; margin-top: 5px; z-index: 200; max-height: 400px; overflow-y: auto; }
         .dropdown.open .dropdown-menu { display: block; }
         .dropdown-item { display: block; width: 100%; text-align: left; padding: 8px 20px; border: none; background: none; cursor: pointer; color: var(--text-main); font-family: var(--font-body); font-size: 0.9rem; }
         .dropdown-item:hover { background: var(--bg-grid-area); }
         
-        /* GRID AREA (Responsive Fix) */
+        /* GRID AREA */
         .game-layout { display: flex; flex: 1; overflow: hidden; }
         .grid-area { 
-            flex: 1; 
-            background: var(--bg-grid-area); 
-            padding: 20px; 
-            display: flex; 
-            justify-content: center; 
-            align-items: flex-start;
-            overflow: auto;
+            flex: 1; background: var(--bg-grid-area); padding: 20px; 
+            display: flex; justify-content: center; align-items: flex-start; overflow: auto;
         }
         
         #crossword-grid { 
-            display: grid; 
-            gap: 1px; 
-            background-color: var(--grid-border); 
-            border: 4px solid var(--grid-border); 
+            display: grid; gap: 1px; background-color: var(--grid-border); border: 4px solid var(--grid-border); 
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            
-            /* --- FORCE FULL SIZE --- */
-            width: 100%;
-            max-width: 85vh; /* Prevents it from getting too tall for screen */
-            aspect-ratio: 1 / 1; /* Forces square shape */
-            margin: 0 auto;
-            
-            /* --- ENABLE SMART FONT SIZING --- */
+            width: 100%; max-width: 85vh; aspect-ratio: 1 / 1; margin: 0 auto;
             container-type: inline-size;
         }
 
         .cell { 
-            background-color: var(--cell-bg); 
-            color: var(--cell-text); 
-            position: relative; 
-            cursor: pointer; 
-            user-select: none; 
-            font-weight: 700; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            
-            /* --- SMART FONT SIZING --- */
-            /* Logic: "100cqw" is the total grid width. Divide by columns. Multiply by 0.6 for aesthetic size. */
+            background-color: var(--cell-bg); color: var(--cell-text); 
+            position: relative; cursor: pointer; user-select: none; font-weight: 700; 
+            display: flex; align-items: center; justify-content: center;
+            /* FIXED FONT SIZE & OVERFLOW: Prevents glitching */
             font-size: calc((100cqw / var(--grid-cols)) * 0.6);
+            overflow: hidden; 
+            line-height: 1;
         }
         
         .cell-num { 
-            position: absolute; top: 2%; left: 3%; 
-            font-size: 0.3em; /* Relative to the cell font size */
-            color: var(--text-muted); pointer-events: none; line-height: 1;
+            position: absolute; top: 2%; left: 3%; font-size: 0.3em; color: var(--text-muted); pointer-events: none; line-height: 1;
         }
         
         .cell.block { background-color: var(--cell-block); cursor: default; }
@@ -181,15 +135,7 @@
         .cell.wrong { color: #d32f2f; }
         .cell.verified { color: #2e7d32; }
 
-        /* CLUES */
-        .clue-sidebar { 
-            width: 420px; 
-            min-width: 300px;
-            border-left: 1px solid var(--border-color); 
-            background: var(--bg-toolbar); 
-            display: flex; flex-direction: column; 
-            z-index: 20; 
-        }
+        .clue-sidebar { width: 420px; min-width: 300px; border-left: 1px solid var(--border-color); background: var(--bg-toolbar); display: flex; flex-direction: column; z-index: 20; }
         .clue-sticky-header { padding: 15px 20px; background: var(--bg-grid-area); border-bottom: 1px solid var(--border-color); font-weight: 600; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .clue-columns-wrapper { display: flex; flex: 1; overflow: hidden; }
         .clue-column { flex: 1; display: flex; flex-direction: column; border-right: 1px solid var(--border-color); }
@@ -206,10 +152,8 @@
     <div id="screen-welcome">
         <h1 class="brand-title">The Swiftword</h1>
         <p style="color:var(--text-muted); font-size: 1.1rem; margin-top:0;">Sunday Edition</p>
-        
         <button class="btn btn-primary" onclick="loadPuzzle(0)">Play Latest</button>
         <button class="btn btn-secondary" onclick="openArchiveModal()">The Archive</button>
-        
         <p id="loading-msg" style="display:none; margin-top:10px; color:var(--text-muted);">Loading puzzle...</p>
     </div>
 
@@ -219,8 +163,7 @@
                 <h2 class="brand-title" style="font-size: 2rem;">The Archive</h2>
                 <button class="tool-btn" onclick="document.getElementById('modal-archive').style.display='none'">✕</button>
             </div>
-            <ul class="archive-list" id="archive-ul">
-                </ul>
+            <ul class="archive-list" id="archive-ul"></ul>
         </div>
     </div>
 
@@ -237,6 +180,23 @@
             <h2 class="brand-title" style="font-size: 2rem;">Paused</h2>
             <div id="pause-time" style="font-size: 1.5rem; font-weight: bold; margin-bottom: 20px;">0:00</div>
             <button class="btn btn-primary" onclick="togglePause()">Resume</button>
+        </div>
+    </div>
+
+    <div id="modal-win" class="modal-overlay">
+        <div class="modal-card">
+            <h2 class="brand-title" style="font-size: 2.5rem; margin-bottom: 10px;">Solved!</h2>
+            <p style="font-size: 1.2rem; color: var(--text-muted);">You finished in</p>
+            <div id="win-time" style="font-size: 2.5rem; font-weight: 700; margin: 10px 0 30px 0; color: var(--text-main);">0:00</div>
+            <button class="btn btn-primary" onclick="document.getElementById('modal-win').style.display='none'">View Board</button>
+        </div>
+    </div>
+
+    <div id="modal-tryagain" class="modal-overlay">
+        <div class="modal-card">
+            <h2 class="brand-title" style="font-size: 2rem;">Almost there!</h2>
+            <p style="color: var(--text-muted); margin-bottom: 20px;">You've filled the grid, but something isn't quite right.</p>
+            <button class="btn btn-primary" onclick="document.getElementById('modal-tryagain').style.display='none'">Keep Trying</button>
         </div>
     </div>
 
@@ -267,7 +227,6 @@
                         <button class="dropdown-item" onclick="setTheme('debut')">Debut</button>
                     </div>
                 </div>
-
                 <div class="dropdown" id="dropdown-reveal">
                     <button class="tool-btn" onclick="toggleDropdown('dropdown-reveal')">Reveal ▾</button>
                     <div class="dropdown-menu">
@@ -276,7 +235,6 @@
                         <button class="dropdown-item" onclick="revealItem('puzzle')">Puzzle</button>
                     </div>
                 </div>
-                
                 <div class="dropdown" id="dropdown-check">
                     <button class="tool-btn" onclick="toggleDropdown('dropdown-check')">Check ▾</button>
                     <div class="dropdown-menu">
@@ -289,40 +247,28 @@
                 </div>
             </div>
         </div>
-
         <div class="game-layout">
             <div class="grid-area">
                 <div id="crossword-grid"></div>
             </div>
-
             <div class="clue-sidebar">
                 <div class="clue-sticky-header" id="sticky-clue">Select a square to start</div>
                 <div class="clue-columns-wrapper">
-                    <div class="clue-column">
-                        <div class="clue-head">ACROSS</div>
-                        <div class="clue-list" id="across-clues"></div>
-                    </div>
-                    <div class="clue-column">
-                        <div class="clue-head">DOWN</div>
-                        <div class="clue-list" id="down-clues"></div>
-                    </div>
+                    <div class="clue-column"><div class="clue-head">ACROSS</div><div class="clue-list" id="across-clues"></div></div>
+                    <div class="clue-column"><div class="clue-head">DOWN</div><div class="clue-list" id="down-clues"></div></div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // ==========================================
-        //  PUZZLE DATABASE 
-        // ==========================================
+        // CONFIG
         const PUZZLE_ARCHIVE = [
             { file: "04022026.puz", title: "Swiftword #1: Feb 4" },
             { file: "testarchive.puz", title: "Archive Test Puzzle" }
         ];
         
-        // ==========================================
-        //  LOGIC
-        // ==========================================
+        // STATE
         let gameState = {
             grid: [], solution: [], clues: { across: {}, down: {} },
             width: 0, height: 0,
@@ -331,20 +277,16 @@
             timerInterval: null, seconds: 0, autocheck: false
         };
 
-        // --- PUZ PARSER ---
+        // PARSER
         function parsePuz(buffer) {
             const view = new DataView(buffer);
             const decoder = new TextDecoder("ISO-8859-1");
-
             const width = view.getUint8(0x2C);
             const height = view.getUint8(0x2D);
             const clueCount = view.getUint16(0x2E, true);
-
             let offset = 0x34;
             const solutionStr = decoder.decode(buffer.slice(offset, offset + (width * height)));
-            offset += (width * height);
-            offset += (width * height); 
-
+            offset += (width * height) * 2; // Skip solution + state
             const readString = () => {
                 let str = "";
                 while (offset < buffer.byteLength) {
@@ -354,14 +296,11 @@
                 }
                 return str;
             };
-
             const title = readString();
             const author = readString();
             const copyright = readString();
-            
             const rawClues = [];
             for(let i=0; i < clueCount; i++) rawClues.push(readString());
-
             return { width, height, solutionStr, rawClues, title, author };
         }
 
@@ -372,11 +311,9 @@
             gameState.grid = [];
             gameState.solution = [];
             gameState.clues = { across: {}, down: {} };
-
             let gridIndex = 0;
             for (let r = 0; r < height; r++) {
-                let rowData = [];
-                let solRow = [];
+                let rowData = [], solRow = [];
                 for (let c = 0; c < width; c++) {
                     const char = solutionStr[gridIndex++];
                     const isBlock = char === '.';
@@ -386,23 +323,12 @@
                 gameState.grid.push(rowData);
                 gameState.solution.push(solRow);
             }
-
-            let currentNum = 1;
-            let clueIndex = 0;
-
+            let currentNum = 1, clueIndex = 0;
             for (let r = 0; r < height; r++) {
                 for (let c = 0; c < width; c++) {
                     if (gameState.grid[r][c].isBlock) continue;
-
-                    let isAcross = false;
-                    let isDown = false;
-                    if (c === 0 || gameState.grid[r][c-1].isBlock) {
-                        if (c + 1 < width && !gameState.grid[r][c+1].isBlock) isAcross = true;
-                    }
-                    if (r === 0 || gameState.grid[r-1][c].isBlock) {
-                        if (r + 1 < height && !gameState.grid[r+1][c].isBlock) isDown = true;
-                    }
-
+                    let isAcross = (c === 0 || gameState.grid[r][c-1].isBlock) && (c + 1 < width && !gameState.grid[r][c+1].isBlock);
+                    let isDown = (r === 0 || gameState.grid[r-1][c].isBlock) && (r + 1 < height && !gameState.grid[r+1][c].isBlock);
                     if (isAcross || isDown) {
                         gameState.grid[r][c].number = currentNum;
                         if (isAcross) gameState.clues.across[currentNum] = rawClues[clueIndex++];
@@ -413,50 +339,37 @@
             }
         }
 
-        // --- LOADING ---
+        // APP LOGIC
         async function loadPuzzle(index) {
             const item = PUZZLE_ARCHIVE[index];
             if(!item) return;
-
             document.getElementById('modal-archive').style.display = 'none';
             document.getElementById('loading-msg').style.display = 'block';
-            
             try {
                 const response = await fetch(`puzzles/${item.file}`);
                 if (!response.ok) throw new Error("Puzzle file not found");
-                
                 const buffer = await response.arrayBuffer();
                 const puzData = parsePuz(buffer);
-                
                 buildGridFromPuz(puzData);
-                
                 document.getElementById('puzzle-meta').innerText = `${puzData.title}\n${puzData.author}`;
-                renderGrid();
-                renderClues();
-                
+                renderGrid(); renderClues();
                 document.getElementById('screen-welcome').style.display = 'none';
                 document.getElementById('screen-game').style.display = 'flex';
                 document.getElementById('modal-ready').style.display = 'flex';
-                
-                // Default cursor position
+                // Reset State
+                gameState.seconds = 0; document.getElementById('timer').innerText = "0:00";
+                // Default Cursor
                 let r=0, c=0;
                 while(r < gameState.height && gameState.grid[r][c].isBlock) {
-                    c++;
-                    if(c >= gameState.width) { c=0; r++; }
+                    c++; if(c >= gameState.width) { c=0; r++; }
                 }
                 moveCursor(r, c);
-
-            } catch (e) {
-                alert("Error loading " + item.file + ": " + e.message);
-                console.error(e);
-            } finally {
-                document.getElementById('loading-msg').style.display = 'none';
-            }
+            } catch (e) { alert("Error: " + e.message); console.error(e); } 
+            finally { document.getElementById('loading-msg').style.display = 'none'; }
         }
         
         function openArchiveModal() {
-            const ul = document.getElementById('archive-ul');
-            ul.innerHTML = '';
+            const ul = document.getElementById('archive-ul'); ul.innerHTML = '';
             PUZZLE_ARCHIVE.forEach((puz, idx) => {
                 const li = document.createElement('li');
                 li.className = 'archive-item';
@@ -467,41 +380,28 @@
             document.getElementById('modal-archive').style.display = 'flex';
         }
 
-        // --- RENDER ---
         function startGame() {
             document.getElementById('modal-ready').style.display = 'none';
-            gameState.isPlaying = true;
-            runTimer();
+            gameState.isPlaying = true; runTimer();
             document.addEventListener('keydown', handleInput);
-            document.addEventListener('click', (e) => {
-                if (!e.target.closest('.dropdown')) closeAllDropdowns();
-            });
+            document.addEventListener('click', (e) => { if (!e.target.closest('.dropdown')) closeAllDropdowns(); });
         }
 
         function renderGrid() {
-            const gridEl = document.getElementById('crossword-grid');
-            gridEl.innerHTML = '';
-            
-            // 1. Pass the column count to CSS for sizing math
+            const gridEl = document.getElementById('crossword-grid'); gridEl.innerHTML = '';
             gridEl.style.setProperty('--grid-cols', gameState.width);
-            
-            // 2. Set grid template
             gridEl.style.gridTemplateColumns = `repeat(${gameState.width}, 1fr)`;
-
             for (let r = 0; r < gameState.height; r++) {
                 for (let c = 0; c < gameState.width; c++) {
                     const cellData = gameState.grid[r][c];
                     const div = document.createElement('div');
                     div.className = 'cell';
-                    if (cellData.isBlock) {
-                        div.classList.add('block');
-                    } else {
+                    if (cellData.isBlock) div.classList.add('block');
+                    else {
                         div.dataset.row = r; div.dataset.col = c;
                         div.innerHTML = `<span class="cell-num">${cellData.number || ''}</span><span class="cell-text">${cellData.letter}</span>`;
                         div.addEventListener('mousedown', (e) => {
-                            if(gameState.isPlaying && !gameState.isPaused) {
-                                e.preventDefault(); handleCellClick(r, c);
-                            }
+                            if(gameState.isPlaying && !gameState.isPaused) { e.preventDefault(); handleCellClick(r, c); }
                         });
                     }
                     gridEl.appendChild(div);
@@ -510,41 +410,28 @@
         }
 
         function renderClues() {
-            const ac = document.getElementById('across-clues');
-            const dc = document.getElementById('down-clues');
+            const ac = document.getElementById('across-clues'), dc = document.getElementById('down-clues');
             ac.innerHTML = ''; dc.innerHTML = '';
-            
             const aKeys = Object.keys(gameState.clues.across).map(Number).sort((a,b)=>a-b);
             const dKeys = Object.keys(gameState.clues.down).map(Number).sort((a,b)=>a-b);
-
-            aKeys.forEach(num => {
-                ac.innerHTML += `<div class="clue-row" id="clue-a-${num}" onclick="jumpToClue(${num}, 'across')"><strong>${num}</strong> ${gameState.clues.across[num]}</div>`;
-            });
-            dKeys.forEach(num => {
-                dc.innerHTML += `<div class="clue-row" id="clue-d-${num}" onclick="jumpToClue(${num}, 'down')"><strong>${num}</strong> ${gameState.clues.down[num]}</div>`;
-            });
+            aKeys.forEach(n => ac.innerHTML += `<div class="clue-row" id="clue-a-${n}" onclick="jumpToClue(${n}, 'across')"><strong>${n}</strong> ${gameState.clues.across[n]}</div>`);
+            dKeys.forEach(n => dc.innerHTML += `<div class="clue-row" id="clue-d-${n}" onclick="jumpToClue(${n}, 'down')"><strong>${n}</strong> ${gameState.clues.down[n]}</div>`);
         }
-        
-        // --- MOVEMENT & INPUT ---
+
+        // INPUT & LOGIC
         function handleCellClick(r, c) {
-            if (gameState.currentRow === r && gameState.currentCol === c) {
-                gameState.direction = gameState.direction === 'across' ? 'down' : 'across';
-            } else {
-                gameState.currentRow = r; gameState.currentCol = c;
-            }
+            if (gameState.currentRow === r && gameState.currentCol === c) gameState.direction = gameState.direction === 'across' ? 'down' : 'across';
+            else { gameState.currentRow = r; gameState.currentCol = c; }
             updateHighlights();
         }
 
         function jumpToClue(num, dir) {
-            for(let r=0; r<gameState.height; r++){
-                for(let c=0; c<gameState.width; c++){
+            for(let r=0; r<gameState.height; r++)
+                for(let c=0; c<gameState.width; c++)
                     if(gameState.grid[r][c].number == num) {
                         gameState.currentRow = r; gameState.currentCol = c; gameState.direction = dir;
-                        updateHighlights();
-                        return;
+                        updateHighlights(); return;
                     }
-                }
-            }
         }
 
         function handleInput(e) {
@@ -555,12 +442,7 @@
             else if (e.key === 'ArrowLeft') moveSelection(0, -1);
             else if (e.key === 'ArrowUp') moveSelection(-1, 0);
             else if (e.key === 'ArrowDown') moveSelection(1, 0);
-            
-            else if (e.key === 'Enter') {
-                e.preventDefault();
-                jumpToNextClue();
-            }
-
+            else if (e.key === 'Enter') { e.preventDefault(); jumpToNextClue(); }
             else if (e.key.match(/^[a-zA-Z]$/)) {
                 e.preventDefault();
                 gameState.grid[r][c].letter = e.key.toUpperCase();
@@ -569,6 +451,9 @@
                 if(gameState.autocheck) checkItem('square');
                 else getCellEl(r,c).classList.remove('wrong');
                 
+                // CHECK WIN
+                checkWinCondition();
+
                 if (gameState.direction === 'across') jumpCursor(0, 1);
                 else jumpCursor(1, 0);
             } 
@@ -584,24 +469,43 @@
             }
         }
 
-        function moveSelection(dr, dc) {
-            let nr = gameState.currentRow + dr;
-            let nc = gameState.currentCol + dc;
-            if(isValidCell(nr, nc)) {
-                if(!gameState.grid[nr][nc].isBlock) moveCursor(nr, nc);
+        function checkWinCondition() {
+            // 1. Check if full
+            let isFull = true;
+            let isCorrect = true;
+            for(let r=0; r<gameState.height; r++){
+                for(let c=0; c<gameState.width; c++){
+                    if(!gameState.grid[r][c].isBlock) {
+                        const letter = gameState.grid[r][c].letter;
+                        if(letter === '') { isFull = false; break; }
+                        if(letter !== gameState.solution[r][c]) isCorrect = false;
+                    }
+                }
+                if(!isFull) break;
+            }
+
+            if(isFull) {
+                if(isCorrect) {
+                    clearInterval(gameState.timerInterval);
+                    gameState.isPlaying = false;
+                    document.getElementById('win-time').innerText = formatTime(gameState.seconds);
+                    document.getElementById('modal-win').style.display = 'flex';
+                } else {
+                    document.getElementById('modal-tryagain').style.display = 'flex';
+                }
             }
         }
 
+        function moveSelection(dr, dc) {
+            let nr = gameState.currentRow + dr, nc = gameState.currentCol + dc;
+            if(isValidCell(nr, nc) && !gameState.grid[nr][nc].isBlock) moveCursor(nr, nc);
+        }
+
         function jumpCursor(dr, dc) {
-            let nr = gameState.currentRow + dr;
-            let nc = gameState.currentCol + dc;
+            let nr = gameState.currentRow + dr, nc = gameState.currentCol + dc;
             while(isValidCell(nr, nc)) {
-                if(!gameState.grid[nr][nc].isBlock) {
-                    moveCursor(nr, nc);
-                    return;
-                }
-                nr += dr;
-                nc += dc;
+                if(!gameState.grid[nr][nc].isBlock) { moveCursor(nr, nc); return; }
+                nr += dr; nc += dc;
             }
         }
 
@@ -610,35 +514,21 @@
             let currentNum = gameState.grid[startCell.r][startCell.c].number;
             let keys = Object.keys(gameState.clues[gameState.direction]).map(Number).sort((a,b)=>a-b);
             let idx = keys.indexOf(currentNum);
-            let nextNum = keys[idx + 1];
-            if(nextNum === undefined) nextNum = keys[0]; 
+            let nextNum = keys[idx + 1] || keys[0];
             if(nextNum) jumpToClue(nextNum, gameState.direction);
         }
 
-        function isValidCell(r, c) {
-            return r >= 0 && r < gameState.height && c >= 0 && c < gameState.width;
-        }
-        
-        function moveCursor(r, c) {
-            gameState.currentRow = r; gameState.currentCol = c;
-            updateHighlights();
-        }
+        function isValidCell(r, c) { return r >= 0 && r < gameState.height && c >= 0 && c < gameState.width; }
+        function moveCursor(r, c) { gameState.currentRow = r; gameState.currentCol = c; updateHighlights(); }
 
         function updateHighlights() {
             document.querySelectorAll('.cell').forEach(el => el.classList.remove('highlight-word', 'highlight-active'));
             document.querySelectorAll('.clue-row').forEach(el => el.classList.remove('active-clue'));
-
             const wordCells = getWordRange(gameState.currentRow, gameState.currentCol, gameState.direction);
-            wordCells.forEach(pos => {
-                const el = getCellEl(pos.r, pos.c);
-                if(el) el.classList.add('highlight-word');
-            });
-
+            wordCells.forEach(pos => getCellEl(pos.r, pos.c).classList.add('highlight-word'));
             const activeEl = getCellEl(gameState.currentRow, gameState.currentCol);
-            if(activeEl) {
-                activeEl.classList.add('highlight-active');
-                activeEl.scrollIntoView({behavior: "smooth", block: "nearest", inline: "center"});
-            }
+            activeEl.classList.add('highlight-active');
+            activeEl.scrollIntoView({behavior: "smooth", block: "nearest", inline: "center"});
             
             if(wordCells.length > 0) {
                 const startCell = wordCells[0];
@@ -649,8 +539,7 @@
                     clueEl.classList.add('active-clue');
                     clueEl.scrollIntoView({behavior: "smooth", block: "nearest"});
                     const dirText = gameState.direction === 'across' ? 'A' : 'D';
-                    const clueText = gameState.clues[gameState.direction][num];
-                    document.getElementById('sticky-clue').innerText = `${num}${dirText} \u00A0 ${clueText}`;
+                    document.getElementById('sticky-clue').innerText = `${num}${dirText} \u00A0 ${gameState.clues[gameState.direction][num]}`;
                 }
             }
         }
@@ -663,8 +552,7 @@
                 if (!isValidCell(cr, cc) || gameState.grid[cr][cc].isBlock) break;
                 cells.push({r: cr, c: cc});
             }
-            cells.reverse(); 
-            cells.push({r, c});
+            cells.reverse(); cells.push({r, c});
             cr = r; cc = c;
             while(true) {
                 if (dir === 'across') cc++; else cr++;
@@ -676,7 +564,7 @@
 
         function getCellEl(r, c) { return document.querySelector(`.cell[data-row='${r}'][data-col='${c}']`); }
 
-        // --- TOOLS ---
+        // TOOLS
         function togglePause() {
             if(!gameState.isPlaying) return;
             gameState.isPaused = !gameState.isPaused;
@@ -685,24 +573,21 @@
         function runTimer() {
             clearInterval(gameState.timerInterval);
             gameState.timerInterval = setInterval(() => {
-                gameState.seconds++;
-                document.getElementById('timer').innerText = formatTime(gameState.seconds);
+                gameState.seconds++; document.getElementById('timer').innerText = formatTime(gameState.seconds);
             }, 1000);
         }
         function formatTime(s) { return `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`; }
         function toggleDropdown(id) {
             const el = document.getElementById(id);
             const wasOpen = el.classList.contains('open');
-            closeAllDropdowns();
-            if(!wasOpen) el.classList.add('open');
+            closeAllDropdowns(); if(!wasOpen) el.classList.add('open');
         }
         function closeAllDropdowns() { document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('open')); }
         function setTheme(theme) { document.body.setAttribute('data-theme', theme); closeAllDropdowns(); }
         function toggleAutocheck() {
             gameState.autocheck = !gameState.autocheck;
             document.getElementById('menu-autocheck').innerText = `Autocheck: ${gameState.autocheck ? 'On' : 'Off'}`;
-            if(gameState.autocheck) checkItem('puzzle');
-            closeAllDropdowns();
+            if(gameState.autocheck) checkItem('puzzle'); closeAllDropdowns();
         }
         function checkItem(scope) {
             let list = getScopeList(scope);
@@ -712,8 +597,7 @@
                 const corr = gameState.solution[pos.r][pos.c];
                 if(user && user !== corr) el.classList.add('wrong');
                 else el.classList.remove('wrong');
-            });
-            closeAllDropdowns();
+            }); closeAllDropdowns();
         }
         function revealItem(scope) {
             let list = getScopeList(scope);
@@ -721,9 +605,9 @@
                 gameState.grid[pos.r][pos.c].letter = gameState.solution[pos.r][pos.c];
                 const el = getCellEl(pos.r, pos.c);
                 el.querySelector('.cell-text').innerText = gameState.solution[pos.r][pos.c];
-                el.classList.add('verified');
-                el.classList.remove('wrong');
+                el.classList.add('verified'); el.classList.remove('wrong');
             });
+            checkWinCondition(); // Check if reveal won the game
             closeAllDropdowns();
         }
         function getScopeList(scope) {
