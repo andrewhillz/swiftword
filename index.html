@@ -48,16 +48,13 @@
         [data-theme="showgirl"] {
             --bg-body: #fffaf0; 
             --bg-toolbar: #ffffff;
-            --bg-grid-area: #fff5e6; /* Very light orange */
+            --bg-grid-area: #fff5e6; 
             --text-main: #000000;
             --border-color: #ffcc99;
-            
-            --grid-border: #ff8c00; /* Dark Orange */
+            --grid-border: #ff8c00; 
             --cell-block: #ff8c00;
-            
-            --highlight-active: #ffd8b1; /* Light Orange */
-            --highlight-word: #fff0e0;   /* Pale Orange */
-            
+            --highlight-active: #ffd8b1; 
+            --highlight-word: #fff0e0;   
             --btn-primary-bg: #ff8c00;
             --btn-primary-text: #ffffff;
         }
@@ -127,7 +124,7 @@
         .dropdown-item { display: block; width: 100%; text-align: left; padding: 8px 20px; border: none; background: none; cursor: pointer; color: var(--text-main); font-family: var(--font-body); font-size: 0.9rem; }
         .dropdown-item:hover { background: var(--bg-grid-area); }
         
-        /* GRID AREA (Responsive) */
+        /* GRID AREA (Responsive Fix) */
         .game-layout { display: flex; flex: 1; overflow: hidden; }
         .grid-area { 
             flex: 1; 
@@ -135,7 +132,7 @@
             padding: 20px; 
             display: flex; 
             justify-content: center; 
-            align-items: flex-start; /* Align top */
+            align-items: flex-start;
             overflow: auto;
         }
         
@@ -145,11 +142,15 @@
             background-color: var(--grid-border); 
             border: 4px solid var(--grid-border); 
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            /* Dynamic columns set by JS */
-            /* Max width constrains it so it doesn't overflow screen */
-            max-width: 95%; 
-            max-height: 95%;
-            aspect-ratio: 1 / 1; /* Keeps the whole grid square */
+            
+            /* --- FORCE FULL SIZE --- */
+            width: 100%;
+            max-width: 85vh; /* Prevents it from getting too tall for screen */
+            aspect-ratio: 1 / 1; /* Forces square shape */
+            margin: 0 auto;
+            
+            /* --- ENABLE SMART FONT SIZING --- */
+            container-type: inline-size;
         }
 
         .cell { 
@@ -158,25 +159,31 @@
             position: relative; 
             cursor: pointer; 
             user-select: none; 
-            font-weight: 600; 
-            /* Text scales relative to cell width */
-            font-size: clamp(10px, 1.6vw, 22px); 
+            font-weight: 700; 
             display: flex; 
             align-items: center; 
             justify-content: center;
-            aspect-ratio: 1 / 1; /* Keeps cells square */
+            
+            /* --- SMART FONT SIZING --- */
+            /* Logic: "100cqw" is the total grid width. Divide by columns. Multiply by 0.6 for aesthetic size. */
+            font-size: calc((100cqw / var(--grid-cols)) * 0.6);
         }
         
-        .cell-num { position: absolute; top: 2%; left: 3%; font-size: 0.35em; color: var(--text-muted); pointer-events: none; line-height: 1;}
+        .cell-num { 
+            position: absolute; top: 2%; left: 3%; 
+            font-size: 0.3em; /* Relative to the cell font size */
+            color: var(--text-muted); pointer-events: none; line-height: 1;
+        }
+        
         .cell.block { background-color: var(--cell-block); cursor: default; }
         .cell.highlight-word { background-color: var(--highlight-word); }
         .cell.highlight-active { background-color: var(--highlight-active); z-index: 2; }
         .cell.wrong { color: #d32f2f; }
         .cell.verified { color: #2e7d32; }
 
-        /* CLUES (Wider) */
+        /* CLUES */
         .clue-sidebar { 
-            width: 420px; /* Wider as requested */
+            width: 420px; 
             min-width: 300px;
             border-left: 1px solid var(--border-color); 
             background: var(--bg-toolbar); 
@@ -306,7 +313,7 @@
 
     <script>
         // ==========================================
-        //  PUZZLE DATABASE (Index 0 = "Today")
+        //  PUZZLE DATABASE 
         // ==========================================
         const PUZZLE_ARCHIVE = [
             { file: "04022026.puz", title: "Swiftword #1: Feb 4" },
@@ -324,7 +331,7 @@
             timerInterval: null, seconds: 0, autocheck: false
         };
 
-        // --- PUZ PARSER (Binary Reader) ---
+        // --- PUZ PARSER ---
         function parsePuz(buffer) {
             const view = new DataView(buffer);
             const decoder = new TextDecoder("ISO-8859-1");
@@ -336,7 +343,7 @@
             let offset = 0x34;
             const solutionStr = decoder.decode(buffer.slice(offset, offset + (width * height)));
             offset += (width * height);
-            offset += (width * height); // Skip state
+            offset += (width * height); 
 
             const readString = () => {
                 let str = "";
@@ -406,12 +413,11 @@
             }
         }
 
-        // --- LOADING & ARCHIVE ---
+        // --- LOADING ---
         async function loadPuzzle(index) {
             const item = PUZZLE_ARCHIVE[index];
             if(!item) return;
 
-            // Close archive modal if open
             document.getElementById('modal-archive').style.display = 'none';
             document.getElementById('loading-msg').style.display = 'block';
             
@@ -432,7 +438,7 @@
                 document.getElementById('screen-game').style.display = 'flex';
                 document.getElementById('modal-ready').style.display = 'flex';
                 
-                // Set Default Position to first white square
+                // Default cursor position
                 let r=0, c=0;
                 while(r < gameState.height && gameState.grid[r][c].isBlock) {
                     c++;
@@ -451,9 +457,6 @@
         function openArchiveModal() {
             const ul = document.getElementById('archive-ul');
             ul.innerHTML = '';
-            
-            // Loop through ALL puzzles (or start at 1 to skip Today's)
-            // Here we show all for flexibility
             PUZZLE_ARCHIVE.forEach((puz, idx) => {
                 const li = document.createElement('li');
                 li.className = 'archive-item';
@@ -479,9 +482,11 @@
             const gridEl = document.getElementById('crossword-grid');
             gridEl.innerHTML = '';
             
-            // DYNAMIC SIZING: set grid-template-columns to fractions
+            // 1. Pass the column count to CSS for sizing math
+            gridEl.style.setProperty('--grid-cols', gameState.width);
+            
+            // 2. Set grid template
             gridEl.style.gridTemplateColumns = `repeat(${gameState.width}, 1fr)`;
-            // (Rows auto-flow, but we ensure cells are square via CSS aspect-ratio)
 
             for (let r = 0; r < gameState.height; r++) {
                 for (let c = 0; c < gameState.width; c++) {
@@ -492,7 +497,6 @@
                         div.classList.add('block');
                     } else {
                         div.dataset.row = r; div.dataset.col = c;
-                        // Use CSS clamp for font size, no inline JS needed
                         div.innerHTML = `<span class="cell-num">${cellData.number || ''}</span><span class="cell-text">${cellData.letter}</span>`;
                         div.addEventListener('mousedown', (e) => {
                             if(gameState.isPlaying && !gameState.isPaused) {
@@ -510,8 +514,8 @@
             const dc = document.getElementById('down-clues');
             ac.innerHTML = ''; dc.innerHTML = '';
             
-            const aKeys = Object.keys(gameState.clues.across).sort((a,b)=>a-b);
-            const dKeys = Object.keys(gameState.clues.down).sort((a,b)=>a-b);
+            const aKeys = Object.keys(gameState.clues.across).map(Number).sort((a,b)=>a-b);
+            const dKeys = Object.keys(gameState.clues.down).map(Number).sort((a,b)=>a-b);
 
             aKeys.forEach(num => {
                 ac.innerHTML += `<div class="clue-row" id="clue-a-${num}" onclick="jumpToClue(${num}, 'across')"><strong>${num}</strong> ${gameState.clues.across[num]}</div>`;
@@ -532,7 +536,6 @@
         }
 
         function jumpToClue(num, dir) {
-            // Find cell with this number
             for(let r=0; r<gameState.height; r++){
                 for(let c=0; c<gameState.width; c++){
                     if(gameState.grid[r][c].number == num) {
@@ -548,48 +551,39 @@
             if (!gameState.isPlaying || gameState.isPaused) return;
             let r = gameState.currentRow, c = gameState.currentCol;
 
-            // Nav
             if (e.key === 'ArrowRight') moveSelection(0, 1);
             else if (e.key === 'ArrowLeft') moveSelection(0, -1);
             else if (e.key === 'ArrowUp') moveSelection(-1, 0);
             else if (e.key === 'ArrowDown') moveSelection(1, 0);
             
-            // Enter Key (Jump to next clue)
             else if (e.key === 'Enter') {
                 e.preventDefault();
                 jumpToNextClue();
             }
 
-            // Typing
             else if (e.key.match(/^[a-zA-Z]$/)) {
                 e.preventDefault();
-                // 1. Fill current
                 gameState.grid[r][c].letter = e.key.toUpperCase();
                 getCellEl(r, c).querySelector('.cell-text').innerText = e.key.toUpperCase();
                 
                 if(gameState.autocheck) checkItem('square');
                 else getCellEl(r,c).classList.remove('wrong');
                 
-                // 2. Jump to next cell (skipping blocks)
                 if (gameState.direction === 'across') jumpCursor(0, 1);
                 else jumpCursor(1, 0);
             } 
-            // Backspace
             else if (e.key === 'Backspace') {
                 e.preventDefault();
                 if (gameState.grid[r][c].letter === '') {
-                     // Move back first (skipping blocks)
                      if (gameState.direction === 'across') jumpCursor(0, -1);
                      else jumpCursor(-1, 0);
                 } else {
-                    // Just delete current
                     gameState.grid[r][c].letter = '';
                     getCellEl(r, c).querySelector('.cell-text').innerText = '';
                 }
             }
         }
 
-        // Move cursor blindly (arrows)
         function moveSelection(dr, dc) {
             let nr = gameState.currentRow + dr;
             let nc = gameState.currentCol + dc;
@@ -598,12 +592,9 @@
             }
         }
 
-        // Move cursor skipping blocks (typing)
         function jumpCursor(dr, dc) {
             let nr = gameState.currentRow + dr;
             let nc = gameState.currentCol + dc;
-            
-            // Loop until we find a valid white square or hit wall
             while(isValidCell(nr, nc)) {
                 if(!gameState.grid[nr][nc].isBlock) {
                     moveCursor(nr, nc);
@@ -614,20 +605,13 @@
             }
         }
 
-        // Logic for Enter Key
         function jumpToNextClue() {
-            // Find current clue number
             let startCell = getWordRange(gameState.currentRow, gameState.currentCol, gameState.direction)[0];
             let currentNum = gameState.grid[startCell.r][startCell.c].number;
-            
-            // Get sorted keys for current direction
             let keys = Object.keys(gameState.clues[gameState.direction]).map(Number).sort((a,b)=>a-b);
             let idx = keys.indexOf(currentNum);
-            
-            // Find next number (wrap around if needed, or stop)
             let nextNum = keys[idx + 1];
-            if(nextNum === undefined) nextNum = keys[0]; // Wrap to start
-            
+            if(nextNum === undefined) nextNum = keys[0]; 
             if(nextNum) jumpToClue(nextNum, gameState.direction);
         }
 
@@ -656,17 +640,14 @@
                 activeEl.scrollIntoView({behavior: "smooth", block: "nearest", inline: "center"});
             }
             
-            // Highlight Sidebar Clue
             if(wordCells.length > 0) {
                 const startCell = wordCells[0];
                 const num = gameState.grid[startCell.r][startCell.c].number;
                 const dirChar = gameState.direction === 'across' ? 'a' : 'd';
                 const clueEl = document.getElementById(`clue-${dirChar}-${num}`);
-                
                 if(clueEl) {
                     clueEl.classList.add('active-clue');
                     clueEl.scrollIntoView({behavior: "smooth", block: "nearest"});
-                    
                     const dirText = gameState.direction === 'across' ? 'A' : 'D';
                     const clueText = gameState.clues[gameState.direction][num];
                     document.getElementById('sticky-clue').innerText = `${num}${dirText} \u00A0 ${clueText}`;
@@ -677,7 +658,6 @@
         function getWordRange(r, c, dir) {
             let cells = [];
             let cr = r, cc = c;
-            // Back
             while(true) {
                 if (dir === 'across') cc--; else cr--;
                 if (!isValidCell(cr, cc) || gameState.grid[cr][cc].isBlock) break;
@@ -685,7 +665,6 @@
             }
             cells.reverse(); 
             cells.push({r, c});
-            // Forward
             cr = r; cc = c;
             while(true) {
                 if (dir === 'across') cc++; else cr++;
@@ -711,7 +690,6 @@
             }, 1000);
         }
         function formatTime(s) { return `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`; }
-
         function toggleDropdown(id) {
             const el = document.getElementById(id);
             const wasOpen = el.classList.contains('open');
@@ -726,7 +704,6 @@
             if(gameState.autocheck) checkItem('puzzle');
             closeAllDropdowns();
         }
-        
         function checkItem(scope) {
             let list = getScopeList(scope);
             list.forEach(pos => {
