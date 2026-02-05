@@ -44,10 +44,25 @@
             --btn-primary-bg: #ffffff; --btn-primary-text: #000000;
         }
 
-        /* ERAS PALETTES (Muted & Elegant) */
-        /* Showgirl: Muted Orange */
-        [data-theme="showgirl"] { --highlight-active: #ffccbc; --highlight-word: #fff3e0; --btn-primary-bg: #e65100; }
-        
+        /* THEME: Life of a Showgirl (Updated #e89946) */
+        [data-theme="showgirl"] {
+            --bg-body: #fdf6f0; 
+            --bg-toolbar: #ffffff;
+            --bg-grid-area: #faeecf; 
+            --text-main: #000000;
+            --border-color: #e89946; 
+            
+            --grid-border: #e89946;
+            --cell-block: #e89946;
+            
+            --highlight-active: #f4cba0; 
+            --highlight-word: #fbebdc;   
+            
+            --btn-primary-bg: #e89946;
+            --btn-primary-text: #ffffff;
+        }
+
+        /* ERAS PALETTES */
         [data-theme="midnights"] { --highlight-active: #4b5d85; --highlight-word: #dbe4ed; --btn-primary-bg: #192a56; }
         [data-theme="evermore"] { --highlight-active: #d9cbb8; --highlight-word: #f0eadd; --btn-primary-bg: #6e4e37; }
         [data-theme="folklore"] { --highlight-active: #cfcfcf; --highlight-word: #ebebeb; --btn-primary-bg: #555555; }
@@ -58,7 +73,6 @@
         [data-theme="speaknow"] { --highlight-active: #dcc2e0; --highlight-word: #f3e6f5; --btn-primary-bg: #5a2e6b; }
         [data-theme="fearless"] { --highlight-active: #fceea7; --highlight-word: #fff9db; --btn-primary-bg: #a68a2d; }
         [data-theme="debut"] { --highlight-active: #b5e5c9; --highlight-word: #e0f5ea; --btn-primary-bg: #1c6b4a; }
-
 
         /* --- LAYOUT --- */
         body {
@@ -100,35 +114,33 @@
         .dropdown.open .dropdown-menu { display: block; }
         .dropdown-item { display: block; width: 100%; text-align: left; padding: 8px 20px; border: none; background: none; cursor: pointer; color: var(--text-main); font-family: var(--font-body); font-size: 0.9rem; }
         .dropdown-item:hover { background: var(--bg-grid-area); }
+        .dropdown-divider { height: 1px; background: var(--border-color); margin: 4px 0; }
         
         /* GRID AREA */
         .game-layout { display: flex; flex: 1; overflow: hidden; }
-        .grid-area { 
-            flex: 1; background: var(--bg-grid-area); padding: 20px; 
-            display: flex; justify-content: center; align-items: flex-start; overflow: auto;
-        }
+        .grid-area { flex: 1; background: var(--bg-grid-area); padding: 20px; display: flex; justify-content: center; align-items: flex-start; overflow: auto; }
         
         #crossword-grid { 
             display: grid; gap: 1px; background-color: var(--grid-border); border: 4px solid var(--grid-border); 
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             width: 100%; max-width: 85vh; aspect-ratio: 1 / 1; margin: 0 auto;
             container-type: inline-size;
+            /* FIXED: minmax(0,1fr) prevents content from forcing box expansion */
+            grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
+            grid-template-rows: repeat(var(--grid-rows), minmax(0, 1fr));
         }
 
         .cell { 
             background-color: var(--cell-bg); color: var(--cell-text); 
             position: relative; cursor: pointer; user-select: none; font-weight: 700; 
             display: flex; align-items: center; justify-content: center;
-            /* FIXED FONT SIZE & OVERFLOW: Prevents glitching */
             font-size: calc((100cqw / var(--grid-cols)) * 0.6);
             overflow: hidden; 
-            line-height: 1;
         }
         
-        .cell-num { 
-            position: absolute; top: 2%; left: 3%; font-size: 0.3em; color: var(--text-muted); pointer-events: none; line-height: 1;
-        }
-        
+        .cell-num { position: absolute; top: 2%; left: 3%; font-size: 0.3em; color: var(--text-muted); pointer-events: none; line-height: 1; }
+        .cell-text { line-height: 1; margin-top: 5%; } /* Fine tune vertical align */
+
         .cell.block { background-color: var(--cell-block); cursor: default; }
         .cell.highlight-word { background-color: var(--highlight-word); }
         .cell.highlight-active { background-color: var(--highlight-active); z-index: 2; }
@@ -241,8 +253,17 @@
                         <button class="dropdown-item" onclick="checkItem('square')">Square</button>
                         <button class="dropdown-item" onclick="checkItem('word')">Word</button>
                         <button class="dropdown-item" onclick="checkItem('puzzle')">Puzzle</button>
-                        <div style="border-top:1px solid var(--border-color); margin: 4px 0;"></div>
+                        <div class="dropdown-divider"></div>
                         <button class="dropdown-item" onclick="toggleAutocheck()" id="menu-autocheck">Autocheck: Off</button>
+                    </div>
+                </div>
+                <div class="dropdown" id="dropdown-clear">
+                    <button class="tool-btn" onclick="toggleDropdown('dropdown-clear')">Clear ▾</button>
+                    <div class="dropdown-menu">
+                        <button class="dropdown-item" onclick="clearItem('square')">Square</button>
+                        <button class="dropdown-item" onclick="clearItem('word')">Word</button>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-item" onclick="clearItem('puzzle')" style="color:#d32f2f;">Clear Board</button>
                     </div>
                 </div>
             </div>
@@ -274,7 +295,8 @@
             width: 0, height: 0,
             currentRow: 0, currentCol: 0, direction: 'across',
             isPlaying: false, isPaused: false,
-            timerInterval: null, seconds: 0, autocheck: false
+            timerInterval: null, seconds: 0, autocheck: false,
+            currentPuzzleId: null, isComplete: false
         };
 
         // PARSER
@@ -286,7 +308,7 @@
             const clueCount = view.getUint16(0x2E, true);
             let offset = 0x34;
             const solutionStr = decoder.decode(buffer.slice(offset, offset + (width * height)));
-            offset += (width * height) * 2; // Skip solution + state
+            offset += (width * height) * 2; 
             const readString = () => {
                 let str = "";
                 while (offset < buffer.byteLength) {
@@ -339,25 +361,65 @@
             }
         }
 
+        // --- LOCAL STORAGE ---
+        function saveProgress() {
+            if (!gameState.currentPuzzleId || gameState.isComplete) return;
+            const saveObj = {
+                grid: gameState.grid.map(row => row.map(c => c.letter)),
+                seconds: gameState.seconds
+            };
+            localStorage.setItem('swiftword_save_' + gameState.currentPuzzleId, JSON.stringify(saveObj));
+        }
+
+        function loadProgress(puzzleId) {
+            const saved = localStorage.getItem('swiftword_save_' + puzzleId);
+            if (saved) {
+                try {
+                    const obj = JSON.parse(saved);
+                    gameState.seconds = obj.seconds;
+                    for(let r=0; r<gameState.height; r++){
+                        for(let c=0; c<gameState.width; c++){
+                            gameState.grid[r][c].letter = obj.grid[r][c] || '';
+                        }
+                    }
+                } catch(e) { console.error("Save file corrupted", e); }
+            }
+        }
+
+        function clearProgress() {
+            if(gameState.currentPuzzleId) localStorage.removeItem('swiftword_save_' + gameState.currentPuzzleId);
+        }
+
         // APP LOGIC
         async function loadPuzzle(index) {
             const item = PUZZLE_ARCHIVE[index];
             if(!item) return;
+            
+            gameState.currentPuzzleId = item.file;
             document.getElementById('modal-archive').style.display = 'none';
             document.getElementById('loading-msg').style.display = 'block';
+            
             try {
                 const response = await fetch(`puzzles/${item.file}`);
                 if (!response.ok) throw new Error("Puzzle file not found");
                 const buffer = await response.arrayBuffer();
                 const puzData = parsePuz(buffer);
+                
                 buildGridFromPuz(puzData);
+                
+                // Try Load Save
+                loadProgress(item.file);
+                
                 document.getElementById('puzzle-meta').innerText = `${puzData.title}\n${puzData.author}`;
                 renderGrid(); renderClues();
+                
                 document.getElementById('screen-welcome').style.display = 'none';
                 document.getElementById('screen-game').style.display = 'flex';
                 document.getElementById('modal-ready').style.display = 'flex';
-                // Reset State
-                gameState.seconds = 0; document.getElementById('timer').innerText = "0:00";
+                
+                // Set Timer Display immediately
+                document.getElementById('timer').innerText = formatTime(gameState.seconds);
+                
                 // Default Cursor
                 let r=0, c=0;
                 while(r < gameState.height && gameState.grid[r][c].isBlock) {
@@ -382,7 +444,9 @@
 
         function startGame() {
             document.getElementById('modal-ready').style.display = 'none';
-            gameState.isPlaying = true; runTimer();
+            gameState.isPlaying = true; 
+            gameState.isComplete = false;
+            runTimer();
             document.addEventListener('keydown', handleInput);
             document.addEventListener('click', (e) => { if (!e.target.closest('.dropdown')) closeAllDropdowns(); });
         }
@@ -390,7 +454,12 @@
         function renderGrid() {
             const gridEl = document.getElementById('crossword-grid'); gridEl.innerHTML = '';
             gridEl.style.setProperty('--grid-cols', gameState.width);
-            gridEl.style.gridTemplateColumns = `repeat(${gameState.width}, 1fr)`;
+            gridEl.style.setProperty('--grid-rows', gameState.height);
+            
+            // NOTE: minmax(0, 1fr) fixes the jitter by ignoring content size for tracks
+            gridEl.style.gridTemplateColumns = `repeat(${gameState.width}, minmax(0, 1fr))`;
+            gridEl.style.gridTemplateRows = `repeat(${gameState.height}, minmax(0, 1fr))`;
+
             for (let r = 0; r < gameState.height; r++) {
                 for (let c = 0; c < gameState.width; c++) {
                     const cellData = gameState.grid[r][c];
@@ -399,6 +468,7 @@
                     if (cellData.isBlock) div.classList.add('block');
                     else {
                         div.dataset.row = r; div.dataset.col = c;
+                        // Separate text from number
                         div.innerHTML = `<span class="cell-num">${cellData.number || ''}</span><span class="cell-text">${cellData.letter}</span>`;
                         div.addEventListener('mousedown', (e) => {
                             if(gameState.isPlaying && !gameState.isPaused) { e.preventDefault(); handleCellClick(r, c); }
@@ -420,9 +490,13 @@
 
         // INPUT & LOGIC
         function handleCellClick(r, c) {
-            if (gameState.currentRow === r && gameState.currentCol === c) gameState.direction = gameState.direction === 'across' ? 'down' : 'across';
+            if (gameState.currentRow === r && gameState.currentCol === c) toggleDirection();
             else { gameState.currentRow = r; gameState.currentCol = c; }
             updateHighlights();
+        }
+
+        function toggleDirection() {
+            gameState.direction = gameState.direction === 'across' ? 'down' : 'across';
         }
 
         function jumpToClue(num, dir) {
@@ -443,19 +517,18 @@
             else if (e.key === 'ArrowUp') moveSelection(-1, 0);
             else if (e.key === 'ArrowDown') moveSelection(1, 0);
             else if (e.key === 'Enter') { e.preventDefault(); jumpToNextClue(); }
+            else if (e.key === ' ') { e.preventDefault(); toggleDirection(); updateHighlights(); }
             else if (e.key.match(/^[a-zA-Z]$/)) {
                 e.preventDefault();
-                gameState.grid[r][c].letter = e.key.toUpperCase();
-                getCellEl(r, c).querySelector('.cell-text').innerText = e.key.toUpperCase();
-                
-                if(gameState.autocheck) checkItem('square');
-                else getCellEl(r,c).classList.remove('wrong');
+                updateCell(r, c, e.key.toUpperCase());
                 
                 // CHECK WIN
                 checkWinCondition();
 
                 if (gameState.direction === 'across') jumpCursor(0, 1);
                 else jumpCursor(1, 0);
+                
+                saveProgress();
             } 
             else if (e.key === 'Backspace') {
                 e.preventDefault();
@@ -463,14 +536,20 @@
                      if (gameState.direction === 'across') jumpCursor(0, -1);
                      else jumpCursor(-1, 0);
                 } else {
-                    gameState.grid[r][c].letter = '';
-                    getCellEl(r, c).querySelector('.cell-text').innerText = '';
+                    updateCell(r, c, '');
+                    saveProgress();
                 }
             }
         }
+        
+        function updateCell(r, c, val) {
+            gameState.grid[r][c].letter = val;
+            getCellEl(r, c).querySelector('.cell-text').innerText = val;
+            if(gameState.autocheck) checkItem('square');
+            else getCellEl(r,c).classList.remove('wrong');
+        }
 
         function checkWinCondition() {
-            // 1. Check if full
             let isFull = true;
             let isCorrect = true;
             for(let r=0; r<gameState.height; r++){
@@ -488,8 +567,10 @@
                 if(isCorrect) {
                     clearInterval(gameState.timerInterval);
                     gameState.isPlaying = false;
+                    gameState.isComplete = true;
                     document.getElementById('win-time').innerText = formatTime(gameState.seconds);
                     document.getElementById('modal-win').style.display = 'flex';
+                    clearProgress(); // Clear save on win
                 } else {
                     document.getElementById('modal-tryagain').style.display = 'flex';
                 }
@@ -568,12 +649,22 @@
         function togglePause() {
             if(!gameState.isPlaying) return;
             gameState.isPaused = !gameState.isPaused;
-            document.getElementById('modal-pause').style.display = gameState.isPaused ? 'flex' : 'none';
+            if (gameState.isPaused) {
+                clearInterval(gameState.timerInterval);
+                document.getElementById('pause-time').innerText = formatTime(gameState.seconds);
+                document.getElementById('modal-pause').style.display = 'flex';
+                saveProgress();
+            } else {
+                document.getElementById('modal-pause').style.display = 'none';
+                runTimer();
+            }
         }
         function runTimer() {
             clearInterval(gameState.timerInterval);
             gameState.timerInterval = setInterval(() => {
-                gameState.seconds++; document.getElementById('timer').innerText = formatTime(gameState.seconds);
+                gameState.seconds++; 
+                document.getElementById('timer').innerText = formatTime(gameState.seconds);
+                if(gameState.seconds % 10 === 0) saveProgress(); // Auto-save every 10s
             }, 1000);
         }
         function formatTime(s) { return `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`; }
@@ -602,12 +693,24 @@
         function revealItem(scope) {
             let list = getScopeList(scope);
             list.forEach(pos => {
-                gameState.grid[pos.r][pos.c].letter = gameState.solution[pos.r][pos.c];
+                updateCell(pos.r, pos.c, gameState.solution[pos.r][pos.c]);
                 const el = getCellEl(pos.r, pos.c);
-                el.querySelector('.cell-text').innerText = gameState.solution[pos.r][pos.c];
                 el.classList.add('verified'); el.classList.remove('wrong');
             });
-            checkWinCondition(); // Check if reveal won the game
+            checkWinCondition(); 
+            saveProgress();
+            closeAllDropdowns();
+        }
+        function clearItem(scope) {
+            if (scope === 'puzzle') {
+                if(!confirm("Are you sure you want to clear the entire board? Your progress will be reset.")) return;
+            }
+            let list = getScopeList(scope);
+            list.forEach(pos => {
+                updateCell(pos.r, pos.c, '');
+                getCellEl(pos.r, pos.c).classList.remove('wrong', 'verified');
+            });
+            saveProgress();
             closeAllDropdowns();
         }
         function getScopeList(scope) {
