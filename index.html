@@ -69,12 +69,12 @@
         [data-theme="fearless"] { --highlight-active: #fceea7; --highlight-word: #fff9db; --btn-primary-bg: #a68a2d; }
         [data-theme="debut"] { --highlight-active: #b5e5c9; --highlight-word: #e0f5ea; --btn-primary-bg: #1c6b4a; }
 
-        /* --- LAYOUT FIXES FOR MOBILE --- */
+        /* --- LAYOUT STABILITY FIXES --- */
         html, body {
             margin: 0; padding: 0;
-            width: 100%; height: 100dvh; /* Dynamic Viewport */
+            width: 100%; height: 100dvh; 
             overflow: hidden; /* Prevent body scroll shifting */
-            overscroll-behavior: none; /* Disable bounce */
+            overscroll-behavior: none; 
             font-family: var(--font-body); 
             background-color: var(--bg-body); 
             color: var(--text-main);
@@ -132,7 +132,7 @@
         .grid-area { 
             flex: 1; background: var(--bg-grid-area); padding: 20px; 
             display: flex; justify-content: center; align-items: flex-start; overflow: auto; 
-            width: 100%; box-sizing: border-box; /* Prevent padding overflow */
+            width: 100%; box-sizing: border-box; 
         }
         
         #crossword-grid { 
@@ -226,7 +226,7 @@
 </head>
 <body data-theme="ttpd">
 
-    <input type="text" id="mobile-input" style="position: absolute; opacity: 0; top: -1000px; left: 0; height: 0; width: 0;" autocomplete="off">
+    <input type="text" id="mobile-input" style="position: fixed; opacity: 0; top: -1000px; left: 0; height: 0; width: 0;" autocomplete="off">
 
     <div id="screen-welcome">
         <img src="images/logo.png" alt="The Swiftword" class="main-logo-img">
@@ -503,10 +503,9 @@
             }
         }
 
-        // --- SAVE/LOAD SYSTEM UPDATED ---
+        // LOCAL STORAGE
         function saveProgress() {
             if (!gameState.currentPuzzleId) return;
-            // Always save, even if complete (store completion status)
             const saveObj = {
                 grid: gameState.grid.map(row => row.map(c => c.letter)),
                 seconds: gameState.seconds,
@@ -544,43 +543,37 @@
         async function loadPuzzle(index) {
             const item = PUZZLE_ARCHIVE[index];
             if(!item) return;
-            
             gameState.currentPuzzleId = item.file;
             document.getElementById('modal-archive').style.display = 'none';
             document.getElementById('loading-msg').style.display = 'block';
-            
             try {
                 const response = await fetch(`puzzles/${item.file}`);
                 if (!response.ok) throw new Error("Puzzle file not found");
                 const buffer = await response.arrayBuffer();
                 const puzData = parsePuz(buffer);
-                
                 buildGridFromPuz(puzData);
                 
-                // RESET STATE
+                // Reset State
                 gameState.seconds = 0; 
                 gameState.isComplete = false;
                 
-                // LOAD SAVE
+                // Load
                 const hasSave = loadProgress(item.file);
                 
                 let displayTitle = puzData.title || "";
                 if (displayTitle.includes("Untitled")) displayTitle = "";
                 document.getElementById('puzzle-meta').innerText = `${displayTitle}\n${puzData.author || ""}`;
-                
                 renderGrid(); renderClues();
                 
                 document.getElementById('screen-welcome').style.display = 'none';
                 document.getElementById('screen-game').style.display = 'flex';
                 
-                // CHECK COMPLETION ON LOAD
+                // WIN LOGIC ON LOAD
                 if (hasSave && gameState.isComplete) {
-                    // Show Completed Screen
                     document.getElementById('completed-time').innerText = formatTime(gameState.completionTime);
                     document.getElementById('modal-completed').style.display = 'flex';
                     document.getElementById('timer').innerText = formatTime(gameState.completionTime);
                 } else {
-                    // Show Ready Screen
                     document.getElementById('modal-ready').style.display = 'flex';
                     document.getElementById('timer').innerText = formatTime(gameState.seconds);
                 }
@@ -601,8 +594,6 @@
                 gameState.isComplete = false;
                 document.getElementById('modal-win').style.display = 'none';
                 document.getElementById('modal-completed').style.display = 'none';
-                
-                // Clear grid
                 for(let r=0; r<gameState.height; r++){
                     for(let c=0; c<gameState.width; c++){
                         if(!gameState.grid[r][c].isBlock) gameState.grid[r][c].letter = '';
@@ -710,7 +701,7 @@
                 checkWinCondition();
                 if (gameState.direction === 'across') jumpCursor(0, 1);
                 else jumpCursor(1, 0);
-                saveProgress(); // AUTO SAVE
+                saveProgress();
             } 
             else if (e.key === 'Backspace') {
                 if(e.preventDefault) e.preventDefault();
@@ -719,7 +710,7 @@
                      else jumpCursor(-1, 0);
                 } else {
                     updateCell(gameState.currentRow, gameState.currentCol, '');
-                    saveProgress(); // AUTO SAVE
+                    saveProgress();
                 }
             }
         }
@@ -751,7 +742,7 @@
                     gameState.completionTime = gameState.seconds; // LOCK TIME
                     document.getElementById('win-time').innerText = formatTime(gameState.seconds);
                     document.getElementById('modal-win').style.display = 'flex';
-                    saveProgress(); // SAVE VICTORY
+                    saveProgress(); // Save completed state
                 } else {
                     document.getElementById('modal-tryagain').style.display = 'flex';
                 }
@@ -790,7 +781,9 @@
             wordCells.forEach(pos => getCellEl(pos.r, pos.c).classList.add('highlight-word'));
             const activeEl = getCellEl(gameState.currentRow, gameState.currentCol);
             activeEl.classList.add('highlight-active');
-            activeEl.scrollIntoView({behavior: "smooth", block: "nearest", inline: "center"});
+            
+            // "Nearest" prevents aggressive shifting on mobile
+            activeEl.scrollIntoView({behavior: "smooth", block: "nearest", inline: "nearest"});
             
             if(wordCells.length > 0) {
                 const startCell = wordCells[0];
@@ -853,6 +846,18 @@
         function toggleDropdown(id) { const el=document.getElementById(id); const open=el.classList.contains('open'); closeAllDropdowns(); if(!open)el.classList.add('open'); }
         function closeAllDropdowns() { document.querySelectorAll('.dropdown').forEach(d=>d.classList.remove('open')); }
         function setTheme(t) { document.body.setAttribute('data-theme', t); if(window.innerWidth<=768)toggleMobileMenu(); else closeAllDropdowns(); }
+        function openArchiveModal() {
+            const ul = document.getElementById('archive-ul'); ul.innerHTML = '';
+            for(let i=1; i < PUZZLE_ARCHIVE.length; i++) {
+                const puz = PUZZLE_ARCHIVE[i];
+                const li = document.createElement('li');
+                li.className = 'archive-item';
+                li.innerHTML = `<span>${puz.title}</span> <span style="font-size:0.8em; color:#666">Play</span>`;
+                li.onclick = () => loadPuzzle(i);
+                ul.appendChild(li);
+            }
+            document.getElementById('modal-archive').style.display = 'flex';
+        }
         function checkItem(scope) {
             let list = getScopeList(scope);
             list.forEach(pos => {
@@ -877,25 +882,13 @@
         function clearItem(scope) {
             if (scope === 'puzzle') {
                 if(!confirm("Are you sure?")) return;
-                clearProgress();
-                // Clear grid
-                for(let r=0; r<gameState.height; r++){
-                    for(let c=0; c<gameState.width; c++){
-                        if(!gameState.grid[r][c].isBlock) {
-                            gameState.grid[r][c].letter = '';
-                            updateCell(r, c, '');
-                        }
-                    }
-                }
-                gameState.seconds = 0;
-                document.getElementById('timer').innerText = "0:00";
-            } else {
-                let list = getScopeList(scope);
-                list.forEach(pos => {
-                    updateCell(pos.r, pos.c, '');
-                    getCellEl(pos.r, pos.c).classList.remove('wrong', 'verified');
-                });
+                localStorage.removeItem('swiftword_save_' + gameState.currentPuzzleId);
             }
+            let list = getScopeList(scope);
+            list.forEach(pos => {
+                updateCell(pos.r, pos.c, '');
+                getCellEl(pos.r, pos.c).classList.remove('wrong', 'verified');
+            });
             saveProgress();
             if(window.innerWidth<=768 && document.getElementById('mobile-menu-overlay').style.display === 'flex') toggleMobileMenu(); else closeAllDropdowns();
         }
