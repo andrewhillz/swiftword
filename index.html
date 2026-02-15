@@ -17,7 +17,7 @@
             --bg-body: #ffffff;
             --bg-toolbar: #ffffff;
             --bg-grid-area: #e8e6e1;
-            --bg-keyboard: #d1d5db; /* Keyboard BG */
+            --bg-keyboard: #d1d5db; 
             --key-bg: #ffffff;
             --text-main: #1a1a1a;
             --text-muted: #666666;
@@ -48,13 +48,15 @@
             --btn-primary-bg: #ffffff; --btn-primary-text: #000000;
         }
 
-        /* THEME: Life of a Showgirl */
+        /* THEME: The Life of a Showgirl (Orange Highlight Only) */
         [data-theme="showgirl"] {
-            --bg-body: #ffffff; --bg-toolbar: #ffffff; --bg-grid-area: #fff8f0; --bg-keyboard: #ffe0b2;
-            --text-main: #000000; --border-color: #d1d1d1;
-            --grid-border: #000000; --cell-block: #000000;
-            --highlight-active: #e89946; --highlight-active-text: #ffffff; --highlight-word: #fbebdc;   
-            --btn-primary-bg: #e89946; --btn-primary-text: #ffffff;
+            /* Inherit white bg and black borders from root */
+            /* Only change highlight and button color */
+            --highlight-active: #e89946; 
+            --highlight-active-text: #ffffff; 
+            --highlight-word: #fbebdc;   
+            --btn-primary-bg: #e89946;
+            --btn-primary-text: #ffffff;
         }
 
         /* ERAS PALETTES */
@@ -72,7 +74,10 @@
         /* --- LAYOUT --- */
         body {
             font-family: var(--font-body); background-color: var(--bg-body); color: var(--text-main);
-            margin: 0; height: 100vh; width: 100vw; display: flex; flex-direction: column; overflow: hidden;
+            margin: 0; 
+            /* Fix for mobile browser bars: Use dynamic viewport height */
+            height: 100dvh; 
+            width: 100vw; display: flex; flex-direction: column; overflow: hidden;
         }
 
         /* SCREENS */
@@ -137,9 +142,14 @@
 
         /* SIDEBAR (Desktop) */
         .clue-sidebar { width: 400px; min-width: 300px; border-left: 1px solid var(--border-color); background: var(--bg-toolbar); display: flex; flex-direction: column; z-index: 20; }
-        .clue-sticky-header { padding: 15px; background: var(--bg-grid-area); border-bottom: 1px solid var(--border-color); font-weight: 600; min-height: 50px; display: flex; align-items: center; }
+        .clue-sticky-header { 
+            padding: 15px; background: var(--bg-grid-area); border-bottom: 1px solid var(--border-color); 
+            font-weight: 600; font-size: 1rem; 
+            min-height: 50px; display: flex; align-items: center;
+        }
         .clue-columns-wrapper { display: flex; flex: 1; overflow: hidden; }
         .clue-column { flex: 1; display: flex; flex-direction: column; border-right: 1px solid var(--border-color); }
+        .clue-column:last-child { border-right: none; }
         .clue-head { padding: 10px; font-weight: 700; border-bottom: 1px solid var(--border-color); text-align: center; font-size: 0.9rem; }
         .clue-list { flex: 1; overflow-y: auto; padding: 10px; }
         .clue-row { padding: 6px; font-size: 0.9rem; cursor: pointer; border-radius: 4px; margin-bottom: 4px; }
@@ -150,10 +160,12 @@
         #virtual-keyboard {
             display: none; /* Hidden on desktop */
             flex-direction: column; gap: 5px; background: var(--bg-keyboard); 
-            padding: 5px; width: 100%; height: 180px; flex-shrink: 0; z-index: 100;
+            /* Fix: Add safe area padding for newer iPhones */
+            padding: 5px 5px max(5px, env(safe-area-inset-bottom)) 5px; 
+            width: 100%; height: auto; flex-shrink: 0; z-index: 100;
             user-select: none;
         }
-        .kb-row { display: flex; gap: 4px; justify-content: center; flex: 1; }
+        .kb-row { display: flex; gap: 4px; justify-content: center; flex: 1; min-height: 42px; }
         .kb-key {
             background: var(--key-bg); color: var(--text-main); border-radius: 4px; font-weight: 600;
             font-family: sans-serif; display: flex; align-items: center; justify-content: center;
@@ -161,7 +173,7 @@
             font-size: 1.2rem;
         }
         .kb-key:active { transform: translateY(1px); opacity: 0.7; }
-        .kb-key.wide { flex: 1.5; max-width: 60px; font-size: 0.9rem; } /* Backspace */
+        .kb-key.wide { flex: 1.5; max-width: 60px; font-size: 0.9rem; }
 
         /* MOBILE MENU */
         #mobile-menu-overlay {
@@ -198,7 +210,6 @@
 
             /* Grid Logic */
             .grid-area { padding: 10px; flex: none; height: auto; align-items: center; } 
-            /* On mobile, limit grid height to keep keyboard visible. 55vh is usually safe */
             #crossword-grid { max-height: 50vh; width: 100%; }
 
             /* Show Keyboard */
@@ -207,6 +218,8 @@
     </style>
 </head>
 <body data-theme="ttpd">
+
+    <input type="text" id="mobile-input" style="position: absolute; opacity: 0; top: -1000px; left: 0; height: 0; width: 0;">
 
     <div id="screen-welcome">
         <img src="images/logo.png" alt="The Swiftword" class="main-logo-img">
@@ -262,27 +275,20 @@
         <div class="accordion-item">
             <div class="accordion-header" onclick="toggleAccordion(this)">THEMES ▾</div>
             <div class="accordion-content">
-                <button onclick="setTheme('showgirl')">Life of a Showgirl (Orange)</button>
-                <button onclick="setTheme('ttpd')">Tortured Poets (Light)</button>
-                <button onclick="setTheme('anthology')">Anthology (Dark)</button>
+                <button onclick="setTheme('showgirl')">The Life of a Showgirl</button>
+                <button onclick="setTheme('ttpd')">Tortured Poets</button>
+                <button onclick="setTheme('anthology')">Anthology</button>
                 <button onclick="setTheme('midnights')">Midnights</button>
-                <button onclick="setTheme('evermore')">Evermore</button>
-                <button onclick="setTheme('folklore')">Folklore</button>
-                <button onclick="setTheme('lover')">Lover</button>
-                <button onclick="setTheme('reputation')">Reputation</button>
                 <button onclick="setTheme('1989')">1989</button>
                 <button onclick="setTheme('red')">Red</button>
-                <button onclick="setTheme('speaknow')">Speak Now</button>
-                <button onclick="setTheme('fearless')">Fearless</button>
-                <button onclick="setTheme('debut')">Debut</button>
             </div>
         </div>
         <div class="accordion-item">
             <div class="accordion-header" onclick="toggleAccordion(this)">CHECK ▾</div>
             <div class="accordion-content">
-                <button onclick="checkItem('square'); toggleMobileMenu()">Check Square</button>
-                <button onclick="checkItem('word'); toggleMobileMenu()">Check Word</button>
-                <button onclick="checkItem('puzzle'); toggleMobileMenu()">Check Puzzle</button>
+                <button onclick="checkItem('square')">Check Square</button>
+                <button onclick="checkItem('word')">Check Word</button>
+                <button onclick="checkItem('puzzle')">Check Puzzle</button>
                 <button onclick="toggleAutocheck()">Toggle Autocheck</button>
             </div>
         </div>
@@ -321,7 +327,7 @@
                 <div class="dropdown" id="dropdown-theme">
                     <button class="tool-btn" onclick="toggleDropdown('dropdown-theme')">Theme ▾</button>
                     <div class="dropdown-menu">
-                        <button class="dropdown-item" onclick="setTheme('showgirl')">Life of a Showgirl (Orange)</button>
+                        <button class="dropdown-item" onclick="setTheme('showgirl')">The Life of a Showgirl</button>
                         <button class="dropdown-item" onclick="setTheme('ttpd')">Tortured Poets (Light)</button>
                         <button class="dropdown-item" onclick="setTheme('anthology')">Anthology (Dark)</button>
                         <button class="dropdown-item" onclick="setTheme('midnights')">Midnights</button>
@@ -336,9 +342,34 @@
                         <button class="dropdown-item" onclick="setTheme('debut')">Debut</button>
                     </div>
                 </div>
-                <button class="tool-btn" onclick="toggleDropdown('dropdown-reveal')">Reveal ▾</button>
-                <div class="dropdown" id="dropdown-reveal" style="display:none"></div>
+                <div class="dropdown" id="dropdown-reveal">
+                    <button class="tool-btn" onclick="toggleDropdown('dropdown-reveal')">Reveal ▾</button>
+                    <div class="dropdown-menu">
+                        <button class="dropdown-item" onclick="revealItem('square')">Square</button>
+                        <button class="dropdown-item" onclick="revealItem('word')">Word</button>
+                        <button class="dropdown-item" onclick="revealItem('puzzle')">Puzzle</button>
+                    </div>
                 </div>
+                <div class="dropdown" id="dropdown-check">
+                    <button class="tool-btn" onclick="toggleDropdown('dropdown-check')">Check ▾</button>
+                    <div class="dropdown-menu">
+                        <button class="dropdown-item" onclick="checkItem('square')">Square</button>
+                        <button class="dropdown-item" onclick="checkItem('word')">Word</button>
+                        <button class="dropdown-item" onclick="checkItem('puzzle')">Puzzle</button>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-item" onclick="toggleAutocheck()" id="menu-autocheck">Autocheck: Off</button>
+                    </div>
+                </div>
+                <div class="dropdown" id="dropdown-clear">
+                    <button class="tool-btn" onclick="toggleDropdown('dropdown-clear')">Clear ▾</button>
+                    <div class="dropdown-menu">
+                        <button class="dropdown-item" onclick="clearItem('square')">Square</button>
+                        <button class="dropdown-item" onclick="clearItem('word')">Word</button>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-item" onclick="clearItem('puzzle')" style="color:#d32f2f;">Clear Board</button>
+                    </div>
+                </div>
+            </div>
 
             <button class="tool-btn" id="mobile-menu-trigger" onclick="toggleMobileMenu()">
                 <svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
@@ -390,7 +421,7 @@
             currentPuzzleId: null, isComplete: false
         };
 
-        // PARSER & BUILDER (Same as previous versions)
+        // PARSER & BUILDER
         function parsePuz(buffer) {
             const view = new DataView(buffer);
             const decoder = new TextDecoder("ISO-8859-1");
@@ -452,7 +483,7 @@
             }
         }
 
-        // --- CORE LOGIC ---
+        // CORE FUNCTIONS
         async function loadPuzzle(index) {
             const item = PUZZLE_ARCHIVE[index];
             if(!item) return;
@@ -466,7 +497,6 @@
                 const puzData = parsePuz(buffer);
                 buildGridFromPuz(puzData);
                 
-                // Load save if exists
                 const saved = localStorage.getItem('swiftword_save_' + item.file);
                 if (saved) {
                     try {
@@ -506,6 +536,9 @@
             gameState.isPlaying = true; gameState.isComplete = false; runTimer();
             document.addEventListener('keydown', handleInput);
             document.addEventListener('click', (e) => { if (!e.target.closest('.dropdown')) closeAllDropdowns(); });
+            
+            // Allow typing even if clicked outside
+            document.getElementById('mobile-input').focus();
         }
 
         function renderGrid() {
@@ -541,7 +574,7 @@
             dKeys.forEach(n => dc.innerHTML += `<div class="clue-row" id="clue-d-${n}" onclick="jumpToClue(${n}, 'down')"><strong>${n}</strong> ${gameState.clues.down[n]}</div>`);
         }
 
-        // --- INTERACTION ---
+        // INPUT
         function vKey(k) {
             if(k === 'BACKSPACE') handleInput({key: 'Backspace', preventDefault:()=>{}});
             else if(k === 'ENTER') jumpToNextClue();
@@ -587,9 +620,11 @@
             }
         }
 
-        function moveSelection(dr, dc) {
-            let nr = gameState.currentRow + dr, nc = gameState.currentCol + dc;
-            if(isValidCell(nr, nc) && !gameState.grid[nr][nc].isBlock) moveCursor(nr, nc);
+        function updateCell(r, c, val) {
+            gameState.grid[r][c].letter = val;
+            getCellEl(r, c).querySelector('.cell-text').innerText = val;
+            if(gameState.autocheck) checkItem('square');
+            else getCellEl(r,c).classList.remove('wrong');
         }
 
         function jumpCursor(dr, dc) {
@@ -599,43 +634,11 @@
                 nr += dr; nc += dc;
             }
         }
-
-        function updateCell(r, c, val) {
-            gameState.grid[r][c].letter = val;
-            getCellEl(r, c).querySelector('.cell-text').innerText = val;
-            if(gameState.autocheck) checkItem('square');
-            else getCellEl(r,c).classList.remove('wrong');
+        
+        function moveSelection(dr, dc) {
+            let nr = gameState.currentRow + dr, nc = gameState.currentCol + dc;
+            if(isValidCell(nr, nc) && !gameState.grid[nr][nc].isBlock) moveCursor(nr, nc);
         }
-
-        function checkWinCondition() {
-            let isFull = true, isCorrect = true;
-            for(let r=0; r<gameState.height; r++){
-                for(let c=0; c<gameState.width; c++){
-                    if(!gameState.grid[r][c].isBlock) {
-                        const letter = gameState.grid[r][c].letter;
-                        if(letter === '') { isFull = false; break; }
-                        if(letter !== gameState.solution[r][c]) isCorrect = false;
-                    }
-                }
-                if(!isFull) break;
-            }
-            if(isFull) {
-                if(isCorrect) {
-                    clearInterval(gameState.timerInterval);
-                    gameState.isPlaying = false;
-                    gameState.isComplete = true;
-                    document.getElementById('win-time').innerText = formatTime(gameState.seconds);
-                    document.getElementById('modal-win').style.display = 'flex';
-                    localStorage.removeItem('swiftword_save_' + gameState.currentPuzzleId);
-                } else {
-                    document.getElementById('modal-tryagain').style.display = 'flex';
-                }
-            }
-        }
-
-        function moveCursor(r, c) { gameState.currentRow = r; gameState.currentCol = c; updateHighlights(); }
-        function isValidCell(r, c) { return r >= 0 && r < gameState.height && c >= 0 && c < gameState.width; }
-        function getCellEl(r, c) { return document.querySelector(`.cell[data-row='${r}'][data-col='${c}']`); }
 
         function jumpToNextClue() {
             let startCell = getWordRange(gameState.currentRow, gameState.currentCol, gameState.direction)[0];
@@ -680,6 +683,7 @@
             }
         }
 
+        // HELPERS
         function getWordRange(r, c, dir) {
             let cells = [];
             let cr = r, cc = c;
@@ -697,7 +701,8 @@
             }
             return cells;
         }
-
+        function isValidCell(r, c) { return r >= 0 && r < gameState.height && c >= 0 && c < gameState.width; }
+        function getCellEl(r, c) { return document.querySelector(`.cell[data-row='${r}'][data-col='${c}']`); }
         function saveProgress() {
             if (!gameState.currentPuzzleId || gameState.isComplete) return;
             const saveObj = {
@@ -706,15 +711,38 @@
             };
             localStorage.setItem('swiftword_save_' + gameState.currentPuzzleId, JSON.stringify(saveObj));
         }
+        function checkWinCondition() {
+            let isFull = true, isCorrect = true;
+            for(let r=0; r<gameState.height; r++){
+                for(let c=0; c<gameState.width; c++){
+                    if(!gameState.grid[r][c].isBlock) {
+                        const letter = gameState.grid[r][c].letter;
+                        if(letter === '') { isFull = false; break; }
+                        if(letter !== gameState.solution[r][c]) isCorrect = false;
+                    }
+                }
+                if(!isFull) break;
+            }
+            if(isFull) {
+                if(isCorrect) {
+                    clearInterval(gameState.timerInterval);
+                    gameState.isPlaying = false;
+                    gameState.isComplete = true;
+                    document.getElementById('win-time').innerText = formatTime(gameState.seconds);
+                    document.getElementById('modal-win').style.display = 'flex';
+                    localStorage.removeItem('swiftword_save_' + gameState.currentPuzzleId);
+                } else {
+                    document.getElementById('modal-tryagain').style.display = 'flex';
+                }
+            }
+        }
 
+        // UI ACTIONS
         function toggleMobileMenu() {
             const menu = document.getElementById('mobile-menu-overlay');
             menu.style.display = (menu.style.display === 'flex') ? 'none' : 'flex';
         }
-        function toggleAccordion(header) {
-            header.parentElement.classList.toggle('active');
-        }
-        
+        function toggleAccordion(header) { header.parentElement.classList.toggle('active'); }
         function setTheme(theme) { document.body.setAttribute('data-theme', theme); if(window.innerWidth<=768) toggleMobileMenu(); else closeAllDropdowns(); }
         function togglePause() {
             if(!gameState.isPlaying) return;
@@ -764,7 +792,7 @@
                 if(user && user !== corr) el.classList.add('wrong');
                 else el.classList.remove('wrong');
             });
-            if(window.innerWidth<=768) toggleMobileMenu(); else closeAllDropdowns();
+            if(window.innerWidth<=768 && document.getElementById('mobile-menu-overlay').style.display === 'flex') toggleMobileMenu(); else closeAllDropdowns();
         }
         function revealItem(scope) {
             let list = getScopeList(scope);
@@ -774,12 +802,12 @@
                 el.classList.add('verified'); el.classList.remove('wrong');
             });
             checkWinCondition(); saveProgress();
-            if(window.innerWidth<=768) toggleMobileMenu(); else closeAllDropdowns();
+            if(window.innerWidth<=768 && document.getElementById('mobile-menu-overlay').style.display === 'flex') toggleMobileMenu(); else closeAllDropdowns();
         }
         function clearItem(scope) {
             if (scope === 'puzzle') {
-                if(!confirm("Are you sure?")) return;
-                localStorage.removeItem('swiftword_save_' + gameState.currentPuzzleId);
+                if(!confirm("Are you sure you want to clear the entire board? Your progress will be reset.")) return;
+                clearProgress(); 
             }
             let list = getScopeList(scope);
             list.forEach(pos => {
@@ -787,13 +815,13 @@
                 getCellEl(pos.r, pos.c).classList.remove('wrong', 'verified');
             });
             saveProgress();
-            if(window.innerWidth<=768) toggleMobileMenu(); else closeAllDropdowns();
+            if(window.innerWidth<=768 && document.getElementById('mobile-menu-overlay').style.display === 'flex') toggleMobileMenu(); else closeAllDropdowns();
         }
         function toggleAutocheck() {
             gameState.autocheck = !gameState.autocheck;
             document.getElementById('menu-autocheck').innerText = `Autocheck: ${gameState.autocheck ? 'On' : 'Off'}`;
             if(gameState.autocheck) checkItem('puzzle');
-            if(window.innerWidth<=768) toggleMobileMenu(); else closeAllDropdowns();
+            if(window.innerWidth<=768 && document.getElementById('mobile-menu-overlay').style.display === 'flex') toggleMobileMenu(); else closeAllDropdowns();
         }
         function getScopeList(scope) {
             let list = [];
