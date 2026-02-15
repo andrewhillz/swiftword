@@ -47,19 +47,21 @@
             --btn-primary-bg: #ffffff; --btn-primary-text: #000000;
         }
 
-        /* THEME: Life of a Showgirl (Orange Highlight Fix) */
+        /* THEME: Life of a Showgirl (Orange Highlight, BLACK borders) */
         [data-theme="showgirl"] {
-            --bg-body: #fdf6f0; 
+            /* Inherit standard background/borders so they stay white/black */
+            --bg-body: #ffffff;
             --bg-toolbar: #ffffff;
-            --bg-grid-area: #faeecf; 
-            --text-main: #000000;
-            --border-color: #e89946; 
-            --grid-border: #e89946;
-            --cell-block: #000000; /* Black blocks as requested */
+            --bg-grid-area: #fff8f0; /* Very subtle warm tint for grid area only */
             
-            /* Highlight matches the Resume Button (#e89946) */
+            /* KEEP BORDERS BLACK */
+            --grid-border: #000000;
+            --cell-block: #000000;
+            --border-color: #d1d1d1;
+
+            /* ORANGE HIGHLIGHTS & BUTTONS */
             --highlight-active: #e89946; 
-            --highlight-active-text: #ffffff; /* White text for contrast on orange */
+            --highlight-active-text: #ffffff; 
             --highlight-word: #fbebdc;   
             
             --btn-primary-bg: #e89946;
@@ -84,6 +86,7 @@
             margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; transition: all 0.3s ease;
         }
 
+        /* WELCOME */
         #screen-welcome {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -97,25 +100,38 @@
         .btn-primary:hover, .btn-secondary:hover { transform: scale(1.05); }
 
         /* MODALS */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); backdrop-filter: blur(8px); z-index: 100; align-items: center; justify-content: center; }
-        [data-theme="anthology"] .modal-overlay { background: rgba(0,0,0,0.8); }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.85); backdrop-filter: blur(8px); z-index: 200; align-items: center; justify-content: center; }
+        [data-theme="anthology"] .modal-overlay { background: rgba(0,0,0,0.85); }
         .modal-card { background: var(--bg-toolbar); color: var(--text-main); padding: 40px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); text-align: center; border: 1px solid var(--border-color); width: 90%; max-width: 400px; max-height: 80vh; overflow-y: auto; }
         
         .archive-list { list-style: none; padding: 0; margin: 20px 0; text-align: left; }
         .archive-item { padding: 12px; border-bottom: 1px solid var(--border-color); cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         .archive-item:hover { background: var(--bg-grid-area); }
 
-        /* GAME UI */
+        /* GAME SCREEN */
         #screen-game { display: none; flex-direction: column; height: 100%; }
-        .toolbar { height: 60px; border-bottom: 1px solid var(--border-color); background: var(--bg-toolbar); flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
-        .toolbar-group { display: flex; align-items: center; gap: 15px; }
-        .timer-pill { background: var(--bg-grid-area); color: var(--text-main); padding: 6px 14px; border-radius: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
-        .tool-btn { background: none; border: none; cursor: pointer; color: var(--text-main); font-family: var(--font-body); font-weight: 600; font-size: 0.9rem; padding: 8px 10px; border-radius: 6px; }
-        .tool-btn:hover { background: rgba(0,0,0,0.05); }
-
-        .toolbar-logo { height: 32px; width: auto; cursor: pointer; transition: opacity 0.2s; }
-        .toolbar-logo:hover { opacity: 0.7; }
         
+        /* TOOLBAR */
+        .toolbar { 
+            height: 60px; border-bottom: 1px solid var(--border-color); background: var(--bg-toolbar); flex-shrink: 0; 
+            display: flex; align-items: center; justify-content: space-between; padding: 0 20px;
+            position: relative; z-index: 30;
+        }
+        .toolbar-group { display: flex; align-items: center; gap: 15px; }
+        .toolbar-logo { height: 28px; width: auto; cursor: pointer; transition: opacity 0.2s; }
+        
+        .timer-pill { background: var(--bg-grid-area); color: var(--text-main); padding: 6px 14px; border-radius: 20px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+        
+        /* TOOL BUTTONS */
+        .tool-btn { 
+            background: none; border: none; cursor: pointer; color: var(--text-main); 
+            font-family: var(--font-body); font-weight: 600; font-size: 0.9rem; padding: 8px 10px; border-radius: 6px; 
+            display: flex; align-items: center; justify-content: center;
+        }
+        .tool-btn:hover { background: rgba(0,0,0,0.05); }
+        .tool-btn svg { width: 18px; height: 18px; fill: currentColor; } /* Size for SVG icons */
+
+        /* DROPDOWNS */
         .dropdown { position: relative; }
         .dropdown-menu { display: none; position: absolute; top: 100%; right: 0; background: var(--bg-toolbar); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 5px 20px rgba(0,0,0,0.15); width: 200px; padding: 8px 0; margin-top: 5px; z-index: 200; max-height: 400px; overflow-y: auto; }
         .dropdown.open .dropdown-menu { display: block; }
@@ -124,8 +140,7 @@
         .dropdown-divider { height: 1px; background: var(--border-color); margin: 4px 0; }
         
         /* GRID AREA */
-        .game-layout { display: flex; flex: 1; overflow: hidden; }
-        
+        .game-layout { display: flex; flex: 1; overflow: hidden; position: relative; }
         .grid-area { 
             flex: 1; background: var(--bg-grid-area); padding: 20px; 
             display: flex; justify-content: center; align-items: flex-start; overflow: auto; 
@@ -156,8 +171,13 @@
         .cell.wrong { color: #d32f2f; }
         .cell.verified { color: #2e7d32; }
 
+        /* SIDEBAR (Desktop) */
         .clue-sidebar { width: 420px; min-width: 300px; border-left: 1px solid var(--border-color); background: var(--bg-toolbar); display: flex; flex-direction: column; z-index: 20; }
-        .clue-sticky-header { padding: 15px 20px; background: var(--bg-grid-area); border-bottom: 1px solid var(--border-color); font-weight: 600; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .clue-sticky-header { 
+            padding: 15px 20px; background: var(--bg-grid-area); border-bottom: 1px solid var(--border-color); 
+            font-weight: 600; font-size: 1rem; 
+            min-height: 50px; display: flex; align-items: center;
+        }
         .clue-columns-wrapper { display: flex; flex: 1; overflow: hidden; }
         .clue-column { flex: 1; display: flex; flex-direction: column; border-right: 1px solid var(--border-color); }
         .clue-column:last-child { border-right: none; }
@@ -167,21 +187,63 @@
         .clue-row:hover { background: var(--bg-grid-area); }
         .clue-row.active-clue { background: var(--highlight-active); color: var(--highlight-active-text); font-weight: 500; }
 
-        /* --- MOBILE STYLES --- */
+        /* --- MOBILE MENU OVERLAY --- */
+        #mobile-menu-overlay {
+            display: none; position: fixed; top: 60px; left: 0; width: 100%; height: calc(100% - 60px);
+            background: var(--bg-body); z-index: 150; flex-direction: column; padding: 20px; overflow-y: auto;
+        }
+        .mobile-menu-section { margin-bottom: 20px; }
+        .mobile-menu-header { font-weight: bold; text-transform: uppercase; color: var(--text-muted); font-size: 0.8rem; margin-bottom: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; }
+        .mobile-menu-btn { 
+            display: block; width: 100%; padding: 12px 0; text-align: left; background: none; border: none; 
+            font-size: 1.1rem; color: var(--text-main); font-family: var(--font-body); border-bottom: 1px solid var(--bg-grid-area);
+        }
+
+        /* --- RESPONSIVE CSS --- */
+        #desktop-tools { display: flex; align-items: center; gap: 15px; }
+        #mobile-menu-trigger { display: none; font-size: 1.5rem; padding: 5px; }
+
         @media (max-width: 768px) {
-            .game-layout { flex-direction: column; }
-            .grid-area { flex: none; height: auto; padding: 10px; }
-            /* On mobile, grid should be responsive width but never taller than wide */
-            #crossword-grid { max-width: 100%; aspect-ratio: 1/1; }
-            .clue-sidebar { width: 100%; flex: 1; border-left: none; border-top: 1px solid var(--border-color); }
+            /* 1. Header Changes */
+            .toolbar { padding: 0 15px; }
+            #desktop-tools { display: none; } /* Hide dropdowns on mobile */
+            #mobile-menu-trigger { display: block; } /* Show hamburger */
             
-            /* On Mobile, sticky header is key. Hide the split lists to save space */
+            /* 2. Layout Stack */
+            .game-layout { flex-direction: column; }
+            
+            /* 3. Grid Fit */
+            .grid-area { 
+                flex: none; /* Don't stretch */
+                width: 100%; 
+                padding: 10px; 
+                /* Calculate height to leave room for clue bar */
+                height: auto;
+            }
+            #crossword-grid { max-width: 100%; }
+
+            /* 4. Clue Bar at Bottom */
+            .clue-sidebar { 
+                width: 100%; 
+                flex: 1; /* Take remaining space */
+                border-left: none; 
+                border-top: 1px solid var(--border-color); 
+                min-height: 120px; /* Ensure space for keyboard */
+            }
+            
+            /* Hide the big list on mobile, focus on the sticky bar */
             .clue-columns-wrapper { display: none; } 
             
-            /* Show simplified clue view on mobile? For now, we will just show the sticky header strongly */
-            .clue-sticky-header { padding: 15px; font-size: 1.1rem; text-align: center; background: var(--highlight-active); color: var(--highlight-active-text); }
-            
-            /* Optional: You could show a single list here, but standard mobile apps focus on the sticky bar + next button */
+            /* Make the sticky header bigger and wrapped */
+            .clue-sticky-header {
+                height: 100%;
+                align-items: flex-start;
+                padding: 15px;
+                font-size: 1.1rem;
+                line-height: 1.4;
+                white-space: normal; /* Allow wrap */
+                overflow-y: auto;
+            }
         }
     </style>
 </head>
@@ -239,15 +301,37 @@
         </div>
     </div>
 
+    <div id="mobile-menu-overlay">
+        <div class="mobile-menu-section">
+            <div class="mobile-menu-header">Game Tools</div>
+            <button class="mobile-menu-btn" onclick="toggleAutocheck()">Toggle Autocheck</button>
+            <button class="mobile-menu-btn" onclick="revealItem('word')">Reveal Word</button>
+            <button class="mobile-menu-btn" onclick="checkItem('word')">Check Word</button>
+            <button class="mobile-menu-btn" onclick="clearItem('puzzle')" style="color:#d32f2f;">Clear Board</button>
+        </div>
+        <div class="mobile-menu-section">
+            <div class="mobile-menu-header">Themes</div>
+            <button class="mobile-menu-btn" onclick="setTheme('showgirl')">Life of a Showgirl</button>
+            <button class="mobile-menu-btn" onclick="setTheme('ttpd')">Tortured Poets</button>
+            <button class="mobile-menu-btn" onclick="setTheme('anthology')">Anthology</button>
+            <button class="mobile-menu-btn" onclick="setTheme('midnights')">Midnights</button>
+            <button class="mobile-menu-btn" onclick="setTheme('1989')">1989</button>
+            <button class="mobile-menu-btn" onclick="setTheme('red')">Red</button>
+        </div>
+        <button class="btn btn-secondary" onclick="toggleMobileMenu()" style="width:100%; margin-top:20px;">Close</button>
+    </div>
+
     <div id="screen-game">
         <div class="toolbar">
             <div class="toolbar-group">
                 <img src="images/textlogo.png" alt="Swiftword" class="toolbar-logo" onclick="location.reload()" title="Back to Home">
                 <div class="timer-pill" id="timer">0:00</div>
-                <button class="tool-btn" onclick="togglePause()" style="font-size:1.2rem; padding:0 8px;" title="Pause">⏸</button>
+                <button class="tool-btn" onclick="togglePause()" title="Pause">
+                    <svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                </button>
             </div>
             
-            <div class="toolbar-group">
+            <div class="toolbar-group" id="desktop-tools">
                 <div class="dropdown" id="dropdown-theme">
                     <button class="tool-btn" onclick="toggleDropdown('dropdown-theme')">Theme ▾</button>
                     <div class="dropdown-menu">
@@ -294,7 +378,12 @@
                     </div>
                 </div>
             </div>
+
+            <button class="tool-btn" id="mobile-menu-trigger" onclick="toggleMobileMenu()">
+                <svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+            </button>
         </div>
+
         <div class="game-layout">
             <div class="grid-area">
                 <div id="crossword-grid"></div>
@@ -434,16 +523,15 @@
                 
                 buildGridFromPuz(puzData);
                 
-                // RESET TIME FOR NEW GAME (User Request)
+                // RESET TIME FOR NEW GAME
                 gameState.seconds = 0; 
                 
-                // Try Load Save (If exists, it overwrites the 0 seconds)
                 loadProgress(item.file);
                 
-                // Title Logic (Hide "Untitled Project")
-                let displayTitle = puzData.title;
-                if (!displayTitle || displayTitle.includes("Untitled")) displayTitle = "The Swiftword";
-                document.getElementById('puzzle-meta').innerText = `${displayTitle}\n${puzData.author}`;
+                // Clean Meta Data (No "Untitled")
+                let displayTitle = puzData.title || "";
+                if (displayTitle.includes("Untitled")) displayTitle = "";
+                document.getElementById('puzzle-meta').innerText = `${displayTitle}\n${puzData.author || ""}`;
                 
                 renderGrid(); renderClues();
                 
@@ -464,6 +552,7 @@
         
         function openArchiveModal() {
             const ul = document.getElementById('archive-ul'); ul.innerHTML = '';
+            // Skip today's puzzle (index 0)
             for(let i=1; i < PUZZLE_ARCHIVE.length; i++) {
                 const puz = PUZZLE_ARCHIVE[i];
                 const li = document.createElement('li');
@@ -487,13 +576,12 @@
             // MOBILE INPUT SETUP
             const mobileInput = document.getElementById('mobile-input');
             mobileInput.addEventListener('input', (e) => {
-                const char = e.target.value.slice(-1); // Get last char typed
+                const char = e.target.value.slice(-1); 
                 if(char && char.match(/[a-zA-Z]/)) {
                     handleMobileInput(char.toUpperCase());
                 }
-                e.target.value = ''; // Reset input
+                e.target.value = ''; 
             });
-            // Handle Backspace on mobile (tricky, sometimes input event with inputType)
             mobileInput.addEventListener('keydown', (e) => {
                 if(e.key === 'Backspace') handleInput(e);
             });
@@ -521,7 +609,7 @@
                                 handleCellClick(r, c); 
                             }
                         });
-                        // Allow click to focus mobile input
+                        // Mobile Focus
                         div.addEventListener('click', () => {
                              if(gameState.isPlaying && !gameState.isPaused) document.getElementById('mobile-input').focus();
                         });
@@ -545,7 +633,7 @@
             if (gameState.currentRow === r && gameState.currentCol === c) toggleDirection();
             else { gameState.currentRow = r; gameState.currentCol = c; }
             updateHighlights();
-            document.getElementById('mobile-input').focus(); // Ensure keyboard comes up
+            document.getElementById('mobile-input').focus(); 
         }
 
         function toggleDirection() {
@@ -581,7 +669,6 @@
             }
         }
 
-        // Helper for both Desktop and Mobile Input
         function handleMobileInput(char) {
             if (!gameState.isPlaying || gameState.isPaused) return;
             processLetter(char);
@@ -635,7 +722,6 @@
                     gameState.isComplete = true;
                     document.getElementById('win-time').innerText = formatTime(gameState.seconds);
                     document.getElementById('modal-win').style.display = 'flex';
-                    // User requested: Do NOT clear progress on win automatically
                 } else {
                     document.getElementById('modal-tryagain').style.display = 'flex';
                 }
@@ -733,17 +819,23 @@
             }, 1000);
         }
         function formatTime(s) { return `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`; }
+        
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu-overlay');
+            menu.style.display = (menu.style.display === 'flex') ? 'none' : 'flex';
+        }
+        
         function toggleDropdown(id) {
             const el = document.getElementById(id);
             const wasOpen = el.classList.contains('open');
             closeAllDropdowns(); if(!wasOpen) el.classList.add('open');
         }
         function closeAllDropdowns() { document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('open')); }
-        function setTheme(theme) { document.body.setAttribute('data-theme', theme); closeAllDropdowns(); }
+        function setTheme(theme) { document.body.setAttribute('data-theme', theme); closeAllDropdowns(); toggleMobileMenu(); }
         function toggleAutocheck() {
             gameState.autocheck = !gameState.autocheck;
             document.getElementById('menu-autocheck').innerText = `Autocheck: ${gameState.autocheck ? 'On' : 'Off'}`;
-            if(gameState.autocheck) checkItem('puzzle'); closeAllDropdowns();
+            if(gameState.autocheck) checkItem('puzzle'); closeAllDropdowns(); toggleMobileMenu();
         }
         function checkItem(scope) {
             let list = getScopeList(scope);
@@ -753,7 +845,7 @@
                 const corr = gameState.solution[pos.r][pos.c];
                 if(user && user !== corr) el.classList.add('wrong');
                 else el.classList.remove('wrong');
-            }); closeAllDropdowns();
+            }); closeAllDropdowns(); toggleMobileMenu();
         }
         function revealItem(scope) {
             let list = getScopeList(scope);
@@ -764,12 +856,12 @@
             });
             checkWinCondition(); 
             saveProgress();
-            closeAllDropdowns();
+            closeAllDropdowns(); toggleMobileMenu();
         }
         function clearItem(scope) {
             if (scope === 'puzzle') {
                 if(!confirm("Are you sure you want to clear the entire board? Your progress will be reset.")) return;
-                clearProgress(); // Clear save file
+                clearProgress(); 
             }
             let list = getScopeList(scope);
             list.forEach(pos => {
@@ -777,7 +869,7 @@
                 getCellEl(pos.r, pos.c).classList.remove('wrong', 'verified');
             });
             saveProgress();
-            closeAllDropdowns();
+            closeAllDropdowns(); toggleMobileMenu();
         }
         function getScopeList(scope) {
             let list = [];
